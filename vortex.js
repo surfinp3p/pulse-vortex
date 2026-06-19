@@ -52,9 +52,15 @@ const RELEASE_ATTRACTION_DROP = 0.85;
 
 // 屏幕震动与释放闪光参数。
 const CHARGE_SHAKE_STRENGTH = 2;
-const RELEASE_SHAKE_STRENGTH = 28;
+const RELEASE_SHAKE_STRENGTH = 86;
 const SHAKE_X_TIME_SCALE = 0.09;
 const SHAKE_Y_TIME_SCALE = 0.075;
+const RELEASE_QUAKE_DECAY = 0.982;
+const RELEASE_QUAKE_X_TIME_SCALE = 0.14;
+const RELEASE_QUAKE_Y_TIME_SCALE = 0.113;
+const RELEASE_QUAKE_Y_SCALE = 1.05;
+const RELEASE_QUAKE_MIN_AMPLITUDE = 0.02;
+const FRAME_RATE_BASE = 60;
 const DRAW_OVERSCAN = 24;
 const RELEASE_FLASH_THRESHOLD = 0.03;
 const RELEASE_FLASH_MAX_ALPHA = 0.3;
@@ -226,6 +232,7 @@ let isPressed = false; // 是否正在蓄能，用于驱动蓄能动画。
 let pressStartTime = ZERO_VALUE; // 本次按下开始时间。
 let chargePower = ZERO_VALUE; // 当前蓄能强度，范围约为 0 到 1。
 let releasePower = ZERO_VALUE; // 释放后的残余能量强度，用于闪光、震动和冲击效果。
+let releaseShakeAmplitude = ZERO_VALUE; // 释放后的独立余震强度，叠加在漩涡中心位置上。
 let shockwaves = []; // 释放时生成的冲击波列表。
 let lastFrameTime = ZERO_VALUE; // 上一帧时间戳，用于计算帧间隔。
 let vortexCenter = { x: INITIAL_CENTER_X, y: INITIAL_CENTER_Y }; // 漩涡当前中心位置，使用屏幕比例坐标。
@@ -272,6 +279,7 @@ function toggleManualPause() {
     pressing = false;
     chargePower = ZERO_VALUE;
     releasePower = ZERO_VALUE;
+    releaseShakeAmplitude = ZERO_VALUE;
     shockwaves = [];
   } else {
     lastMouseMoveTime = performance.now();
@@ -614,9 +622,18 @@ function draw(time = ZERO_VALUE) {
   vortexCenter.y += (targetCenter.y - vortexCenter.y) * clamp(delta * CENTER_FOLLOW_SPEED, ZERO_VALUE, FULL_ALPHA);
   lastFrameTime = time;
 
-  const cx = width * vortexCenter.x;
-  const cy = height * vortexCenter.y;
-  const screenShake = chargePower * CHARGE_SHAKE_STRENGTH + releasePower * RELEASE_SHAKE_STRENGTH;
+  releaseShakeAmplitude *= Math.pow(RELEASE_QUAKE_DECAY, delta * FRAME_RATE_BASE);
+  if (releaseShakeAmplitude < RELEASE_QUAKE_MIN_AMPLITUDE) {
+    releaseShakeAmplitude = ZERO_VALUE;
+  }
+
+  const baseCx = width * vortexCenter.x;
+  const baseCy = height * vortexCenter.y;
+  const releaseShakeOffsetX = Math.sin(time * RELEASE_QUAKE_X_TIME_SCALE) * releaseShakeAmplitude;
+  const releaseShakeOffsetY = Math.cos(time * RELEASE_QUAKE_Y_TIME_SCALE) * releaseShakeAmplitude * RELEASE_QUAKE_Y_SCALE;
+  const cx = baseCx + releaseShakeOffsetX;
+  const cy = baseCy + releaseShakeOffsetY;
+  const screenShake = chargePower * CHARGE_SHAKE_STRENGTH;
   const shakeX = Math.sin(time * SHAKE_X_TIME_SCALE) * screenShake;
   const shakeY = Math.cos(time * SHAKE_Y_TIME_SCALE) * screenShake;
   const maxRadius = Math.max(
@@ -673,6 +690,7 @@ window.addEventListener("pointerup", () => {
 
   if (chargePower > RELEASE_TRIGGER_THRESHOLD) {
     releasePower = chargePower;
+    releaseShakeAmplitude = chargePower * RELEASE_SHAKE_STRENGTH;
     const waveX = width * vortexCenter.x;
     const waveY = height * vortexCenter.y;
 

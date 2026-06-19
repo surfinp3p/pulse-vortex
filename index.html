@@ -6,23 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!--
     创造性说明：
-    本作品没有复刻现成小游戏，而是围绕“漩涡”的视觉主题进行原创表达。
-    创意重点包括：使用 Canvas 绘制会呼吸的粉色漩涡、根据鼠标/触摸位置改变漩涡中心、
-    长按蓄力后释放爆炸冲击波、静置时进入更暗的黑洞状态，并用简洁界面突出互动体验。
-  -->
-  <!--
-    创造性说明：
     
-    本作品以“漩涡”为主题，
-    通过 Canvas 实现粒子吸引、鼠标跟随、
-    长按蓄能释放、休眠唤醒等交互效果。
-    
-    设计灵感来源于黑洞吸积盘与能量场概念，
-    希望通过极简元素表达“压缩、积累、释放”
-    这一动态过程。
-    
-    所有核心交互逻辑均基于原生 JavaScript 实现，
-    未使用 Vue、React、Three.js 等外部框架。
+    创造性主要在于主题：不是具体功能实现，而是视觉想法传达。
+    设计灵感来源于漩涡这一本身就具有一定视觉冲击力的自然现象以及对“爆炸”这一视觉元素的兴趣（通过释放冲击波的形式呈现），希望通过简洁的交互和视觉效果，带给浏览者一种沉浸式的体验。
     -->
   <title>💥爆炸漩涡</title>
   <link rel="stylesheet" href="vortex.css">
@@ -40,7 +26,7 @@
         </div>
 
         <div class="hud-panel" aria-label="运行提示">
-          <p><span>空格键</span><span>→ 启动 / 强制休眠</span></p>
+          <p><span>空格键</span><span>→ 启动 / 关闭休眠</span></p>
           <p><span>移动鼠标</span><span>→ 引导漩涡</span></p>
           <p><span>长按左键</span><span>→ 正向旋转蓄能</span></p>
           <p><span>右键 / Shift+左键</span><span>→ 反向旋转蓄能</span></p>
@@ -54,8 +40,8 @@
     <footer class="vortex-credit is-visible" id="vortexCredit">
       灵感起点：<a href="https://fff.cmiscm.com/#!/section/spiral" target="_blank" rel="noopener noreferrer">FFF Spiral
         Section</a><br>
-      具体功能的要求为原创设计，未直接复刻任何现有游戏机制<br>
-      事实上这个作品的主要想法在于视觉冲击主题的表达，而非特定游戏玩法的实现<br>
+      具体功能为原创的想法，没有直接复刻任何现有游戏机制<br>
+      不过其实这个作品的主要想法在于 视觉冲击主题 的表达，而不是对特定游戏玩法的实现<br>
       感谢 ChatGPT 在设计构思、交互讨论与细节打磨过程中提供的帮助与启发<br>
       感谢 Codex 在功能实现、代码调试与方案落地过程中提供的辅助支持<br>
     </footer>
