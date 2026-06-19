@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    创造性说明：
+    本作品没有复刻现成小游戏，而是围绕“漩涡”的视觉主题进行原创表达。
+    创意重点包括：使用 Canvas 绘制会呼吸的粉色漩涡、根据鼠标/触摸位置改变漩涡中心、
+    长按蓄力后释放爆炸冲击波、静置时进入更暗的黑洞状态，并用简洁界面突出互动体验。
+  -->
+  <!--
+    创造性说明：
+    
+    本作品以“漩涡”为主题，
+    通过 Canvas 实现粒子吸引、鼠标跟随、
+    长按蓄能释放、休眠唤醒等交互效果。
+    
+    设计灵感来源于黑洞吸积盘与能量场概念，
+    希望通过极简元素表达“压缩、积累、释放”
+    这一动态过程。
+    
+    所有核心交互逻辑均基于原生 JavaScript 实现，
+    未使用 Vue、React、Three.js 等外部框架。
+    -->
+  <title>💥爆炸漩涡</title>
+  <link rel="stylesheet" href="vortex.css">
+</head>
+
+<body>
+  <main class="vortex-page">
+    <canvas id="vortexCanvas" aria-label="简洁漩涡视觉效果"></canvas>
+
+    <section class="instruction-panel" aria-label="交互说明">
+      <p><span>默认状态</span><span>→ 休眠，先按空格启动</span></p>
+      <p><span>空格键</span><span>→ 启动 / 强制休眠</span></p>
+      <p><span>移动鼠标</span><span>→ 引导漩涡</span></p>
+      <p><span>长按左键</span><span>→ 正向旋转蓄能</span></p>
+      <p><span>右键 / Shift+左键</span><span>→ 反向旋转蓄能</span></p>
+      <p><span>松开鼠标</span><span>→ 释放冲击波</span></p>
+      <p><span>数秒无操作</span><span>→ 自动休眠</span></p>
+      <p class="instruction-tip"><span>提示</span><span>使用右键时尽量保持鼠标静止，防止浏览器手势误操作</span></p>
+    </section>
+
+    <footer class="vortex-credit">
+      灵感起点：FFF Spiral Section (https://fff.cmiscm.com/#!/section/spiral)<br>
+      开发辅助：Codex &amp; ChatGPT
+    </footer>
+  </main>
+
+  <script src="vortex.js"></script>
+</body>
+
+</html>

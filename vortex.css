@@ -1,0 +1,103 @@
+:root {
+  --pulse-top: #fbcacb;
+  --pulse-bottom: #f79697;
+  --pulse-white: rgba(255, 255, 255, 0.94);
+  --pulse-soft: rgba(255, 255, 255, 0.22);
+  --pulse-shadow: rgba(104, 35, 35, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  color: white;
+  font-family: Arial, "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,.26), transparent 28rem),
+    linear-gradient(to bottom, var(--pulse-top) 0%, var(--pulse-bottom) 100%);
+}
+
+.vortex-page {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255,255,255,.24), transparent 18rem),
+    radial-gradient(circle at 78% 78%, rgba(255,255,255,.16), transparent 22rem),
+    linear-gradient(to bottom, var(--pulse-top) 0%, var(--pulse-bottom) 100%);
+}
+
+#vortexCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.instruction-panel {
+  position: fixed;
+  z-index: 5;
+  left: 24px;
+  bottom: 46px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11px;
+  line-height: 1.65;
+  letter-spacing: .02em;
+  text-shadow: 0 1px 8px rgba(104, 35, 35, 0.18);
+  pointer-events: none;
+}
+
+.instruction-panel p {
+  display: grid;
+  grid-template-columns: 96px auto;
+  gap: 12px;
+  margin: 0;
+}
+
+.instruction-tip {
+  opacity: 0.72;
+}
+
+.vortex-credit {
+  position: fixed;
+  z-index: 5;
+  left: 24px;
+  right: 24px;
+  bottom: 14px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 10px;
+  line-height: 1.45;
+  text-align: center;
+  text-shadow: 0 1px 8px rgba(104, 35, 35, 0.16);
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .instruction-panel {
+    left: 14px;
+    bottom: 50px;
+    font-size: 10px;
+  }
+
+  .instruction-panel p {
+    grid-template-columns: 90px auto;
+    gap: 8px;
+  }
+
+  .vortex-credit {
+    left: 14px;
+    right: 14px;
+    bottom: 10px;
+    font-size: 9px;
+  }
+
+}
