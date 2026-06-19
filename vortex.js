@@ -211,6 +211,8 @@ const RGB_SHADE_DARK = "24,8,16";
 
 const canvas = document.getElementById("vortexCanvas");
 const ctx = canvas.getContext("2d");
+const introOverlay = document.getElementById("introOverlay");
+const vortexCredit = document.getElementById("vortexCredit");
 
 let dpr = Math.min(MAX_DEVICE_PIXEL_RATIO, window.devicePixelRatio || FALLBACK_DEVICE_PIXEL_RATIO); // 当前设备像素比，用于高清屏适配。
 let width = window.innerWidth; // 画布显示宽度。
@@ -246,6 +248,21 @@ function rgba(rgb, alpha) {
   return `rgba(${rgb},${alpha})`;
 }
 
+// 启动引导层模块：休眠时显示中央序章，运行时转化为左下角 HUD。
+function updateIntroOverlay() {
+  if (!introOverlay) {
+    return;
+  }
+
+  introOverlay.classList.toggle("is-intro", isManuallyPaused);
+  introOverlay.classList.toggle("is-hud", !isManuallyPaused);
+  introOverlay.classList.toggle("is-hud-dimmed", !isManuallyPaused && (isPressed || pressing));
+
+  if (vortexCredit) {
+    vortexCredit.classList.toggle("is-visible", isManuallyPaused);
+  }
+}
+
 // 手动休眠模块：通过空格键切换强制休眠，并清除蓄能与释放残留。
 function toggleManualPause() {
   isManuallyPaused = !isManuallyPaused;
@@ -259,6 +276,8 @@ function toggleManualPause() {
   } else {
     lastMouseMoveTime = performance.now();
   }
+
+  updateIntroOverlay();
 }
 
 // 蓄能启动模块：统一处理左右键和组合键触发的蓄能入口。
@@ -268,6 +287,7 @@ function startCharge(direction) {
   isPressed = true;
   pressStartTime = performance.now();
   lastMouseMoveTime = pressStartTime;
+  updateIntroOverlay();
 }
 
 // 尺寸适配模块：让 Canvas 在高分辨率屏幕上保持清晰。
@@ -620,6 +640,7 @@ function draw(time = ZERO_VALUE) {
   drawShockwaves();
   drawOuterShade(cx, cy, maxRadius, idleFactor);
 
+  updateIntroOverlay();
   ctx.restore();
   requestAnimationFrame(draw);
 }
@@ -671,6 +692,7 @@ window.addEventListener("pointerup", () => {
   chargePower = ZERO_VALUE;
   pressing = false;
   isPressed = false;
+  updateIntroOverlay();
 });
 
 // 取消模块：当指针取消或页面失焦时清除蓄能状态。
@@ -678,6 +700,7 @@ function cancelCharge() {
   pressing = false;
   isPressed = false;
   chargePower = ZERO_VALUE;
+  updateIntroOverlay();
 }
 
 window.addEventListener("pointercancel", cancelCharge);
@@ -697,4 +720,5 @@ window.addEventListener("keydown", (event) => {
 });
 
 resize();
+updateIntroOverlay();
 requestAnimationFrame(draw);

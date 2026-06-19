@@ -43,28 +43,115 @@ body {
   height: 100%;
 }
 
-.instruction-panel {
+.intro-overlay {
   position: fixed;
   z-index: 5;
-  left: 24px;
-  bottom: 46px;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 11px;
-  line-height: 1.65;
-  letter-spacing: .02em;
-  text-shadow: 0 1px 8px rgba(104, 35, 35, 0.18);
+  inset: 0;
+  padding: 28px;
+  color: rgba(255, 255, 255, 0.78);
   pointer-events: none;
+  text-align: center;
+  text-shadow: 0 1px 14px rgba(104, 35, 35, 0.24);
 }
 
-.instruction-panel p {
+.intro-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(520px, calc(100vw - 56px));
+  transform: translate(-50%, -52%) scale(1);
+  transform-origin: center center;
+  transition:
+    left 1.15s ease,
+    top 1.15s ease,
+    transform 1.15s ease,
+    opacity 1.15s ease;
+}
+
+.intro-overlay.is-hud .intro-content {
+  left: 24px;
+  top: calc(100% - 190px);
+  width: min(430px, calc(100vw - 48px));
+  transform: translate(0, 0) scale(0.92);
+  transform-origin: left bottom;
+}
+
+.intro-main,
+.hud-panel {
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.intro-main {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.intro-overlay.is-hud .intro-main {
+  opacity: 0;
+  transform: scale(0.86);
+}
+
+.hud-panel {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: .03em;
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  text-align: left;
+  transition:
+    opacity 0.4s ease,
+    transform 1s ease;
+}
+
+.intro-overlay.is-hud .hud-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.intro-overlay.is-hud.is-hud-dimmed .hud-panel {
+  opacity: 0.15;
+}
+
+.intro-kicker {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.intro-awaken {
+  margin: 58px 0 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 18px;
+  letter-spacing: .2em;
+  animation: awakenBreath 3.6s ease-in-out infinite;
+}
+
+.hud-panel p {
   display: grid;
-  grid-template-columns: 96px auto;
-  gap: 12px;
+  grid-template-columns: 132px auto;
+  gap: 14px;
   margin: 0;
 }
 
 .instruction-tip {
   opacity: 0.72;
+}
+
+@keyframes awakenBreath {
+  0%,
+  100% {
+    opacity: 0.56;
+  }
+
+  50% {
+    opacity: 0.96;
+  }
 }
 
 .vortex-credit {
@@ -78,18 +165,55 @@ body {
   line-height: 1.45;
   text-align: center;
   text-shadow: 0 1px 8px rgba(104, 35, 35, 0.16);
-  pointer-events: none;
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity 0.8s ease;
+}
+
+.vortex-credit.is-visible {
+  opacity: 1;
+}
+
+.vortex-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 720px) {
-  .instruction-panel {
+  .intro-overlay {
+    padding: 18px;
+  }
+
+  .intro-content {
+    width: min(360px, calc(100vw - 36px));
+    transform: translate(-50%, -52%) scale(1);
+  }
+
+  .intro-overlay.is-hud .intro-content {
     left: 14px;
-    bottom: 50px;
+    top: calc(100% - 190px);
+    width: min(340px, calc(100vw - 28px));
+    transform: translate(0, 0) scale(0.9);
+  }
+
+  .intro-kicker {
+    font-size: 25px;
+    letter-spacing: .1em;
+  }
+
+  .intro-awaken {
+    margin-top: 44px;
+    font-size: 14px;
+  }
+
+  .hud-panel {
     font-size: 10px;
   }
 
-  .instruction-panel p {
-    grid-template-columns: 90px auto;
+  .hud-panel p {
+    grid-template-columns: 116px auto;
     gap: 8px;
   }
 
