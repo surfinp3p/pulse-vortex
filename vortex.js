@@ -1,5 +1,5 @@
 // 画布与初始状态参数。
-const MAX_DEVICE_PIXEL_RATIO = 2;
+const MAX_DEVICE_PIXEL_RATIO = 1.25;
 const FALLBACK_DEVICE_PIXEL_RATIO = 1;
 const INITIAL_CENTER_X = 0.52;
 const INITIAL_CENTER_Y = 0.49;
@@ -29,7 +29,9 @@ const SPIN_DIRECTION_BLEND_SPEED = 0.08;
 // 蓄能、释放与呼吸脉动参数。
 const FULL_CHARGE_DURATION_MS = 2500;
 const CHARGE_FADE_SPEED = 0.08;
-const RELEASE_FADE_SPEED = 0.038;
+const RELEASE_INTENSITY_POWER = 2;
+const RELEASE_FADE_FAST = 0.052;
+const RELEASE_FADE_SLOW = 0.022;
 const BREATHING_TIME_SCALE = 0.001;
 const BREATHING_AMPLITUDE = 0.04;
 const ACTIVE_ENERGY_SCALE = 1.05;
@@ -55,7 +57,8 @@ const CHARGE_SHAKE_STRENGTH = 2;
 const RELEASE_SHAKE_STRENGTH = 86;
 const SHAKE_X_TIME_SCALE = 0.09;
 const SHAKE_Y_TIME_SCALE = 0.075;
-const RELEASE_QUAKE_DECAY = 0.982;
+const RELEASE_QUAKE_DECAY_LOW = 0.94;
+const RELEASE_QUAKE_DECAY_HIGH = 0.986;
 const RELEASE_QUAKE_X_TIME_SCALE = 0.14;
 const RELEASE_QUAKE_Y_TIME_SCALE = 0.113;
 const RELEASE_QUAKE_Y_SCALE = 1.05;
@@ -88,16 +91,17 @@ const RELEASE_GRID_WARP = 0.08;
 const HALF_SCREEN_FACTOR = 0.5;
 
 // 漩涡螺旋光带绘制参数。
-const SPIRAL_STEP_COUNT = 900;
+const SPIRAL_STEP_COUNT = 420;
 const SPIRAL_STEP_INCREMENT = 1;
+const SPIRAL_IDLE_STEP_INCREMENT = 1;
 const SPIRAL_RADIUS_POWER = 1.16;
 const SPIRAL_TURN_MULTIPLIER = 14.6;
 const SPIRAL_WAVE_FREQUENCY = 20;
 const SPIRAL_PHASE_WAVE_SCALE = 4.2;
 const SPIRAL_Y_SCALE = 0.86;
-const BRIGHT_SPIRAL_BLUR_ACTIVE = 18;
+const BRIGHT_SPIRAL_BLUR_ACTIVE = 7;
 const BRIGHT_SPIRAL_BLUR_IDLE = 10;
-const DARK_SPIRAL_BLUR_ACTIVE = 8;
+const DARK_SPIRAL_BLUR_ACTIVE = 2;
 const DARK_SPIRAL_BLUR_IDLE = 4;
 const BRIGHT_SPIRAL_BANDS = [
   { start: 0.2, widthScale: 0.052, color: "rgba(255,255,255,.92)", alpha: 0.92, phaseScale: 1 },
@@ -110,8 +114,9 @@ const DARK_SPIRAL_BANDS = [
 ];
 
 // 柔和内层环纹理参数。
-const RING_COUNT_ACTIVE = 34;
+const RING_COUNT_ACTIVE = 16;
 const RING_COUNT_IDLE = 14;
+const RING_IDLE_STEP_INCREMENT = 1;
 const RING_RADIUS_START = 0.03;
 const RING_RADIUS_STEP = 0.017;
 const RING_Y_SCALE = 0.84;
@@ -166,14 +171,15 @@ const CHARGE_SHADE_EDGE_ALPHA = 0.38;
 // 释放冲击波参数。
 const RELEASE_TRIGGER_THRESHOLD = 0.08;
 const SHOCKWAVE_COUNT = 4;
+const SHOCKWAVE_MAX_ACTIVE = 6;
 const SHOCKWAVE_RADIUS_STEP = 24;
 const SHOCKWAVE_ALPHA_SCALE = 1.28;
 const SHOCKWAVE_ALPHA_DROP = 0.15;
 const SHOCKWAVE_BASE_SPEED = 36;
-const SHOCKWAVE_CHARGE_SPEED = 90;
+const SHOCKWAVE_INTENSITY_SPEED = 118;
 const SHOCKWAVE_INDEX_SPEED = 13;
 const SHOCKWAVE_BASE_WIDTH = 8;
-const SHOCKWAVE_CHARGE_WIDTH = 40;
+const SHOCKWAVE_INTENSITY_WIDTH = 52;
 const SHOCKWAVE_INDEX_WIDTH_DROP = 4;
 const SHOCKWAVE_ALPHA_DECAY = 0.935;
 const SHOCKWAVE_MIN_ALPHA = 0.02;
@@ -232,6 +238,7 @@ let isPressed = false; // 是否正在蓄能，用于驱动蓄能动画。
 let pressStartTime = ZERO_VALUE; // 本次按下开始时间。
 let chargePower = ZERO_VALUE; // 当前蓄能强度，范围约为 0 到 1。
 let releasePower = ZERO_VALUE; // 释放后的残余能量强度，用于闪光、震动和冲击效果。
+let currentReleaseIntensity = ZERO_VALUE; // 当前释放强度，由蓄能值非线性映射得到，用于统一控制释放反馈层级。
 let releaseShakeAmplitude = ZERO_VALUE; // 释放后的独立余震强度，叠加在漩涡中心位置上。
 let shockwaves = []; // 释放时生成的冲击波列表。
 let lastFrameTime = ZERO_VALUE; // 上一帧时间戳，用于计算帧间隔。
@@ -279,6 +286,7 @@ function toggleManualPause() {
     pressing = false;
     chargePower = ZERO_VALUE;
     releasePower = ZERO_VALUE;
+    currentReleaseIntensity = ZERO_VALUE;
     releaseShakeAmplitude = ZERO_VALUE;
     shockwaves = [];
   } else {
@@ -311,9 +319,9 @@ function resize() {
 }
 
 // 螺旋光带模块：绘制漩涡中的一条弯曲光带。
-function drawSpiralBand(cx, cy, maxRadius, start, widthScale, color, alpha, phase) {
+function drawSpiralBand(cx, cy, maxRadius, start, widthScale, color, alpha, phase, stepIncrement) {
   ctx.beginPath();
-  for (let step = ZERO_VALUE; step <= SPIRAL_STEP_COUNT; step += SPIRAL_STEP_INCREMENT) {
+  for (let step = ZERO_VALUE; step <= SPIRAL_STEP_COUNT; step += stepIncrement) {
     const t = step / SPIRAL_STEP_COUNT;
     const radius = maxRadius * Math.pow(t, SPIRAL_RADIUS_POWER);
     const turn = start + t * Math.PI * SPIRAL_TURN_MULTIPLIER + phase;
@@ -396,7 +404,7 @@ function drawWarpedGrid(cx, cy, gridAlpha, chargeAmount, releaseAmount) {
 }
 
 // 漩涡主体模块：叠加明亮和暗色螺旋层，形成主体旋转感。
-function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAmount) {
+function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAmount, spiralStepIncrement) {
   ctx.save();
   ctx.filter = `blur(${lerp(BRIGHT_SPIRAL_BLUR_ACTIVE, BRIGHT_SPIRAL_BLUR_IDLE, idleAmount)}px)`;
   ctx.globalCompositeOperation = "screen";
@@ -409,7 +417,8 @@ function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAm
       maxRadius * band.widthScale * attractionStrength,
       band.color,
       band.alpha * glowAlpha,
-      spin * band.phaseScale
+      spin * band.phaseScale,
+      spiralStepIncrement
     );
   });
   ctx.restore();
@@ -426,19 +435,20 @@ function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAm
       maxRadius * band.widthScale,
       band.color,
       lerp(band.activeAlpha, band.idleAlpha, idleAmount),
-      spin * band.phaseScale
+      spin * band.phaseScale,
+      spiralStepIncrement
     );
   });
   ctx.restore();
 }
 
 // 内层纹理模块：添加柔和的内部轨道纹理，不作为蓄能提示。
-function drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleAmount) {
+function drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleAmount, ringStepIncrement) {
   ctx.save();
   ctx.globalCompositeOperation = "screen";
 
   const ringCount = Math.round(lerp(RING_COUNT_ACTIVE, RING_COUNT_IDLE, idleAmount));
-  for (let i = ZERO_VALUE; i < ringCount; i += 1) {
+  for (let i = ZERO_VALUE; i < ringCount; i += ringStepIncrement) {
     const radius = maxRadius * (RING_RADIUS_START + i * RING_RADIUS_STEP);
     ctx.beginPath();
     ctx.ellipse(cx, cy, radius, radius * RING_Y_SCALE, spin * RING_ROTATION_SCALE + i * RING_ROTATION_OFFSET, ZERO_VALUE, FULL_CIRCLE);
@@ -593,7 +603,11 @@ function draw(time = ZERO_VALUE) {
   } else {
     chargePower = lerp(chargePower, ZERO_VALUE, CHARGE_FADE_SPEED);
   }
-  releasePower = lerp(releasePower, ZERO_VALUE, RELEASE_FADE_SPEED);
+  const releaseFadeSpeed = lerp(RELEASE_FADE_FAST, RELEASE_FADE_SLOW, currentReleaseIntensity);
+  releasePower = lerp(releasePower, ZERO_VALUE, releaseFadeSpeed);
+  if (releasePower < RELEASE_FLASH_THRESHOLD) {
+    currentReleaseIntensity = ZERO_VALUE;
+  }
 
   const idleSpin = MIN_SPIN * IDLE_SPIN_FACTOR;
   const baseSpin = lerp(MIN_SPIN, idleSpin, idleFactor);
@@ -614,6 +628,9 @@ function draw(time = ZERO_VALUE) {
     (FULL_ALPHA + chargePower * CHARGE_ATTRACTION_BOOST - releasePower * RELEASE_ATTRACTION_DROP);
   const gridAlpha = lerp(GRID_BASE_ALPHA, GRID_IDLE_ALPHA, idleFactor) *
     (FULL_ALPHA + chargePower * CHARGE_GRID_ALPHA_BOOST + releasePower * RELEASE_GRID_ALPHA_BOOST);
+  const isHighEnergyFrame = isPressed || chargePower > CHARGE_SHADE_THRESHOLD || releasePower > RELEASE_FLASH_THRESHOLD;
+  const spiralStepIncrement = idleFactor > HALF_SCREEN_FACTOR && !isHighEnergyFrame ? SPIRAL_IDLE_STEP_INCREMENT : SPIRAL_STEP_INCREMENT;
+  const ringStepIncrement = idleFactor > HALF_SCREEN_FACTOR && !isHighEnergyFrame ? RING_IDLE_STEP_INCREMENT : SPIRAL_STEP_INCREMENT;
 
   spinDirection = lerp(spinDirection, targetSpinDirection, SPIN_DIRECTION_BLEND_SPEED);
   spinVelocity += (targetSpin - spinVelocity) * clamp(delta * easing, ZERO_VALUE, FULL_ALPHA);
@@ -622,7 +639,8 @@ function draw(time = ZERO_VALUE) {
   vortexCenter.y += (targetCenter.y - vortexCenter.y) * clamp(delta * CENTER_FOLLOW_SPEED, ZERO_VALUE, FULL_ALPHA);
   lastFrameTime = time;
 
-  releaseShakeAmplitude *= Math.pow(RELEASE_QUAKE_DECAY, delta * FRAME_RATE_BASE);
+  const releaseQuakeDecay = lerp(RELEASE_QUAKE_DECAY_LOW, RELEASE_QUAKE_DECAY_HIGH, currentReleaseIntensity);
+  releaseShakeAmplitude *= Math.pow(releaseQuakeDecay, delta * FRAME_RATE_BASE);
   if (releaseShakeAmplitude < RELEASE_QUAKE_MIN_AMPLITUDE) {
     releaseShakeAmplitude = ZERO_VALUE;
   }
@@ -649,8 +667,8 @@ function draw(time = ZERO_VALUE) {
   drawBackground(idleFactor, releasePower);
   drawReleaseFlash(releasePower);
   drawWarpedGrid(cx, cy, gridAlpha, chargePower, releasePower);
-  drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleFactor);
-  drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleFactor);
+  drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleFactor, spiralStepIncrement);
+  drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleFactor, ringStepIncrement);
   drawCoreEnergyPulse(cx, cy, maxRadius, chargePower, time);
   drawCenterGlow(cx, cy, maxRadius, glowAlpha, chargePower, releasePower);
   drawChargeCompressionShade(cx, cy, maxRadius, chargePower);
@@ -689,8 +707,12 @@ window.addEventListener("pointerup", () => {
   }
 
   if (chargePower > RELEASE_TRIGGER_THRESHOLD) {
-    releasePower = chargePower;
-    releaseShakeAmplitude = chargePower * RELEASE_SHAKE_STRENGTH;
+    const releaseIntensity = Math.pow(chargePower, RELEASE_INTENSITY_POWER);
+    const visibleReleaseIntensity = lerp(0.18, FULL_ALPHA, releaseIntensity);
+
+    releasePower = visibleReleaseIntensity;
+    currentReleaseIntensity = releaseIntensity;
+    releaseShakeAmplitude = visibleReleaseIntensity * RELEASE_SHAKE_STRENGTH;
     const waveX = width * vortexCenter.x;
     const waveY = height * vortexCenter.y;
 
@@ -699,11 +721,15 @@ window.addEventListener("pointerup", () => {
         x: waveX,
         y: waveY,
         radius: i * SHOCKWAVE_RADIUS_STEP,
-        alpha: clamp(chargePower * SHOCKWAVE_ALPHA_SCALE * (FULL_ALPHA - i * SHOCKWAVE_ALPHA_DROP), ZERO_VALUE, FULL_ALPHA),
-        power: chargePower,
-        speed: SHOCKWAVE_BASE_SPEED + chargePower * SHOCKWAVE_CHARGE_SPEED + i * SHOCKWAVE_INDEX_SPEED,
-        width: SHOCKWAVE_BASE_WIDTH + chargePower * SHOCKWAVE_CHARGE_WIDTH - i * SHOCKWAVE_INDEX_WIDTH_DROP
+        alpha: clamp(visibleReleaseIntensity * SHOCKWAVE_ALPHA_SCALE * (FULL_ALPHA - i * SHOCKWAVE_ALPHA_DROP), ZERO_VALUE, FULL_ALPHA),
+        power: releaseIntensity,
+        speed: SHOCKWAVE_BASE_SPEED + releaseIntensity * SHOCKWAVE_INTENSITY_SPEED + i * SHOCKWAVE_INDEX_SPEED,
+        width: SHOCKWAVE_BASE_WIDTH + releaseIntensity * SHOCKWAVE_INTENSITY_WIDTH - i * SHOCKWAVE_INDEX_WIDTH_DROP
       });
+    }
+
+    if (shockwaves.length > SHOCKWAVE_MAX_ACTIVE) {
+      shockwaves = shockwaves.slice(shockwaves.length - SHOCKWAVE_MAX_ACTIVE);
     }
   }
 
