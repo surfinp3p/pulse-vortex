@@ -1,21 +1,22 @@
+/* 整个页面会反复用到的颜色，集中写在这里方便修改。 */
 :root {
   --pulse-top: #fbcacb;
   --pulse-bottom: #f79697;
-  --pulse-white: rgba(255, 255, 255, 0.94);
-  --pulse-soft: rgba(255, 255, 255, 0.22);
-  --pulse-shadow: rgba(104, 35, 35, 0.14);
 }
 
+/* 让元素的宽高计算更直观，边框也算在宽高里面。 */
 * {
   box-sizing: border-box;
 }
 
+/* 让 html 和 body 都占满整个浏览器窗口。 */
 html,
 body {
   width: 100%;
   height: 100%;
 }
 
+/* 页面整体设置：去掉默认边距，隐藏滚动条，设置字体和背景。 */
 body {
   margin: 0;
   overflow: hidden;
@@ -26,6 +27,7 @@ body {
     linear-gradient(to bottom, var(--pulse-top) 0%, var(--pulse-bottom) 100%);
 }
 
+/* 最外层页面容器，占满整个屏幕。 */
 .vortex-page {
   position: fixed;
   inset: 0;
@@ -36,6 +38,7 @@ body {
     linear-gradient(to bottom, var(--pulse-top) 0%, var(--pulse-bottom) 100%);
 }
 
+/* 画布区域，JS 会在这里画出漩涡和动画效果。 */
 #vortexCanvas {
   position: absolute;
   inset: 0;
@@ -43,6 +46,7 @@ body {
   height: 100%;
 }
 
+/* 提示文字层：一开始显示在中间，交互后移动到左下角。 */
 .intro-overlay {
   position: fixed;
   z-index: 5;
@@ -54,31 +58,46 @@ body {
   text-shadow: 0 1px 14px rgba(104, 35, 35, 0.24);
 }
 
+/* 提示层的背景，目前是透明的，只保留过渡效果。 */
+.intro-overlay::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: none;
+  opacity: 0;
+  transition: opacity 1.15s ease;
+}
+
+.intro-overlay.is-intro::before {
+  opacity: 0;
+}
+
+/* 提示内容的位置和移动动画。 */
 .intro-content {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(520px, calc(100vw - 56px));
-  transform: translate(-50%, -52%) scale(1);
+  top: 0;
+  left: 0;
+  width: min(430px, calc(100vw - 56px));
+  transform: translate(calc(50vw - 50%), calc(50vh - 52%)) scale(1);
   transform-origin: center center;
+  will-change: transform, opacity;
   transition:
-    left 1.15s ease,
-    top 1.15s ease,
-    transform 1.15s ease,
+    transform 1.15s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 1.15s ease;
 }
 
 .intro-overlay.is-hud .intro-content {
-  left: 24px;
-  top: calc(100% - 190px);
-  width: min(430px, calc(100vw - 48px));
-  transform: translate(0, 0) scale(0.92);
+  transform: translate(24px, calc(100vh - 190px)) scale(0.92);
   transform-origin: left bottom;
 }
 
+/* 主标题和左下角提示面板的显示、隐藏动画。 */
 .intro-main,
 .hud-panel {
-  transition: opacity 1s ease, transform 1s ease;
+  will-change: opacity, transform;
+  transition:
+    opacity 0.82s ease,
+    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .intro-main {
@@ -91,6 +110,7 @@ body {
   transform: scale(0.86);
 }
 
+/* 左下角的小提示面板。 */
 .hud-panel {
   position: absolute;
   inset: 0 auto auto 0;
@@ -103,8 +123,8 @@ body {
   transform: translateY(10px) scale(0.96);
   text-align: left;
   transition:
-    opacity 0.4s ease,
-    transform 1s ease;
+    opacity 0.72s ease,
+    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .intro-overlay.is-hud .hud-panel {
@@ -116,19 +136,25 @@ body {
   opacity: 0.15;
 }
 
+/* 一开始显示在屏幕中间的大标题。 */
 .intro-kicker {
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
   font-size: 32px;
   font-weight: 800;
   letter-spacing: .16em;
+  text-shadow:
+    0 1px 18px rgba(104, 35, 35, 0.26),
+    0 0 28px rgba(255, 255, 255, 0.18);
 }
 
+/* 标题下面的小提示文字，会一明一暗地闪动。 */
 .intro-awaken {
   margin: 58px 0 0;
   color: rgba(255, 255, 255, 0.86);
   font-size: 18px;
   letter-spacing: .2em;
+  text-shadow: 0 0 18px rgba(255, 238, 241, 0.28);
   animation: awakenBreath 3.6s ease-in-out infinite;
 }
 
@@ -139,10 +165,12 @@ body {
   margin: 0;
 }
 
+/* 辅助说明文字，颜色淡一点。 */
 .instruction-tip {
   opacity: 0.72;
 }
 
+/* 让提示文字不断变亮、变暗。 */
 @keyframes awakenBreath {
   0%,
   100% {
@@ -154,6 +182,7 @@ body {
   }
 }
 
+/* 底部的说明 */
 .vortex-credit {
   position: fixed;
   z-index: 5;
@@ -181,21 +210,19 @@ body {
   text-underline-offset: 3px;
 }
 
+/* 手机屏幕上的样式调整，主要是缩小间距和字号。 */
 @media (max-width: 720px) {
   .intro-overlay {
     padding: 18px;
   }
 
   .intro-content {
-    width: min(360px, calc(100vw - 36px));
-    transform: translate(-50%, -52%) scale(1);
+    width: min(340px, calc(100vw - 36px));
+    transform: translate(calc(50vw - 50%), calc(50vh - 52%)) scale(1);
   }
 
   .intro-overlay.is-hud .intro-content {
-    left: 14px;
-    top: calc(100% - 190px);
-    width: min(340px, calc(100vw - 28px));
-    transform: translate(0, 0) scale(0.9);
+    transform: translate(14px, calc(100vh - 190px)) scale(0.9);
   }
 
   .intro-kicker {

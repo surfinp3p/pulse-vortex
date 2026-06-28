@@ -12,24 +12,30 @@ const OVERSCAN_SIZE_SCALE = 2;
 const MILLISECONDS_PER_SECOND = 1000;
 const DEFAULT_DELTA_SECONDS = 0.016;
 const MAX_DELTA_SECONDS = 0.05;
-const MIN_SPIN = 1.45;
+const MIN_SPIN = 0.48;
 const INITIAL_SPIN_VELOCITY = MIN_SPIN;
-const MAX_SPIN = 5.6;
-const CHARGE_ACCELERATION = 0.45;
+const MAX_SPIN = 6.2;
+const CHARGE_ACCELERATION = 1.1;
 const RELEASE_DECELERATION = 2.1;
-const IDLE_THRESHOLD_MS = 8000;
+const IDLE_THRESHOLD_MS = 5000;
 const IDLE_BLEND_SPEED = 0.03;
 const IDLE_COMPLETE_THRESHOLD = 0.95;
-const IDLE_SPIN_FACTOR = 0.3;
+const MANUAL_PAUSE_BLEND_SPEED = 0.018;
+const IDLE_SPIN_FACTOR = 0.52;
 const RELEASE_SPIN_BOOST = 3.3;
-const CHARGE_SPIN_BOOST = 0.9;
+const CHARGE_SPIN_BOOST = 0.7;
+const CHARGE_SPIN_POWER = 0.72;
 const CENTER_FOLLOW_SPEED = 4.6;
 const SPIN_DIRECTION_BLEND_SPEED = 0.08;
 
 // 蓄能、释放与呼吸脉动参数。
-const FULL_CHARGE_DURATION_MS = 2500;
+const FULL_CHARGE_DURATION_MS = 10000;
 const CHARGE_FADE_SPEED = 0.08;
-const RELEASE_INTENSITY_POWER = 2;
+const RELEASE_INTENSITY_POWER = 1.45;
+const RELEASE_INTENSITY_HOLD_START_MS = 800;
+const RELEASE_INTENSITY_HOLD_RANGE_MS = 9200;
+const RELEASE_BASE_INTENSITY = 0.09;
+const RELEASE_VISIBLE_INTENSITY_SCALE = 0.91;
 const RELEASE_FADE_FAST = 0.052;
 const RELEASE_FADE_SLOW = 0.022;
 const BREATHING_TIME_SCALE = 0.001;
@@ -37,24 +43,28 @@ const BREATHING_AMPLITUDE = 0.04;
 const ACTIVE_ENERGY_SCALE = 1.05;
 const CHARGE_COMPRESSION_SCALE = 0.22;
 const RELEASE_EXPANSION_SCALE = 0.48;
-const IDLE_RADIUS_SCALE = 0.78;
-const GLOW_IDLE_ALPHA = 0.38;
+const CHARGE_ZOOM_SCALE = 0.1;
+const IDLE_RADIUS_SCALE = 0.9;
+const GLOW_IDLE_ALPHA = 0.56;
 const GLOW_ACTIVE_ALPHA = 0.95;
 const GLOW_BREATH_MIN = 0.75;
 const GLOW_BREATH_MAX = 1.15;
 const GLOW_BREATH_BASE = 0.96;
 const GLOW_BREATH_RANGE = 0.08;
 const CHARGE_GLOW_BOOST = 0.45;
-const RELEASE_GLOW_BOOST = 3.8;
+const RELEASE_GLOW_BOOST = 1.6;
 const MIN_GLOW_ALPHA = 0.18;
 const MAX_GLOW_ALPHA = 1.25;
-const IDLE_ATTRACTION_SCALE = 0.32;
+const IDLE_ATTRACTION_SCALE = 0.52;
 const CHARGE_ATTRACTION_BOOST = 0.65;
 const RELEASE_ATTRACTION_DROP = 0.85;
+const MAIN_VORTEX_SCALE = 0.88;
+const OVERLOAD_DURATION_MS = 2000;
 
 // 屏幕震动与释放闪光参数。
 const CHARGE_SHAKE_STRENGTH = 2;
 const RELEASE_SHAKE_STRENGTH = 86;
+const RELEASE_BASE_SHAKE = 2.2;
 const SHAKE_X_TIME_SCALE = 0.09;
 const SHAKE_Y_TIME_SCALE = 0.075;
 const RELEASE_QUAKE_DECAY_LOW = 0.94;
@@ -68,6 +78,10 @@ const DRAW_OVERSCAN = 24;
 const RELEASE_FLASH_THRESHOLD = 0.03;
 const RELEASE_FLASH_MAX_ALPHA = 0.3;
 const RELEASE_FLASH_ALPHA_SCALE = 0.4;
+const RELEASE_FLASH_FRONT_SPEED_SCALE = 0.56;
+const RELEASE_FLASH_FRONT_WIDTH_SCALE = 0.1;
+const RELEASE_FLASH_INNER_ALPHA_SCALE = 0.34;
+const RELEASE_FLASH_FRONT_ALPHA_SCALE = 1.05;
 
 // 背景渐变与静置暗化参数。
 const BACKGROUND_TOP_COLOR = "#fbcacb";
@@ -78,53 +92,78 @@ const RELEASE_SHADOW_ERASE_SCALE = 0.22;
 const OUTER_RADIUS_SCALE = 1.08;
 
 // 背景网格扭曲参数。
-const GRID_BASE_ALPHA = 0.16;
-const GRID_IDLE_ALPHA = 0.045;
-const CHARGE_GRID_ALPHA_BOOST = 0.8;
-const RELEASE_GRID_ALPHA_BOOST = 2.8;
-const GRID_LINE_WIDTH = 1;
-const MIN_GRID_GAP = 54;
-const GRID_SCREEN_SCALE = 0.075;
-const GRID_BASE_WARP = 0.05;
-const CHARGE_GRID_WARP = 0.18;
-const RELEASE_GRID_WARP = 0.08;
+const GRID_BASE_ALPHA = 0.34;
+const GRID_IDLE_ALPHA = 0.2;
+const CHARGE_GRID_ALPHA_BOOST = 1.35;
+const RELEASE_GRID_ALPHA_BOOST = 3;
+const GRID_LINE_WIDTH = 1.55;
+const MIN_GRID_GAP = 58;
+const GRID_SCREEN_SCALE = 0.078;
+const GRID_BASE_WARP = 0.07;
+const CHARGE_GRID_WARP = 0.42;
+const RELEASE_GRID_WARP = 0.12;
+const GRID_SEGMENT_COUNT = 10;
+const GRID_INFLUENCE_RADIUS_SCALE = 0.38;
+const GRID_CHARGE_INFLUENCE_BOOST = 0.16;
+const GRID_SWIRL_STRENGTH = 0.64;
+const GRID_CHARGE_SWIRL_BOOST = 2.25;
+const GRID_RELEASE_SWIRL_BOOST = 0.72;
+const GRID_PULL_STRENGTH = 0.045;
+const GRID_CENTER_DENSITY_PULL = 0.13;
+const GRID_RELEASE_EXPANSION = 0.075;
+const GRID_FLOW_TIME_SCALE = 0.0012;
+const GRID_NEAR_ALPHA_BOOST = 1.05;
 const HALF_SCREEN_FACTOR = 0.5;
 
 // 漩涡螺旋光带绘制参数。
-const SPIRAL_STEP_COUNT = 420;
+const SPIRAL_STEP_COUNT = 620;
 const SPIRAL_STEP_INCREMENT = 1;
 const SPIRAL_IDLE_STEP_INCREMENT = 1;
 const SPIRAL_RADIUS_POWER = 1.16;
-const SPIRAL_TURN_MULTIPLIER = 14.6;
-const SPIRAL_WAVE_FREQUENCY = 20;
-const SPIRAL_PHASE_WAVE_SCALE = 4.2;
-const SPIRAL_Y_SCALE = 0.86;
-const BRIGHT_SPIRAL_BLUR_ACTIVE = 7;
-const BRIGHT_SPIRAL_BLUR_IDLE = 10;
-const DARK_SPIRAL_BLUR_ACTIVE = 2;
-const DARK_SPIRAL_BLUR_IDLE = 4;
+const SPIRAL_TURN_MULTIPLIER = 19.4;
+const SPIRAL_CHARGE_TURN_MULTIPLIER = 14.6;
+const SPIRAL_WAVE_FREQUENCY = 24;
+const SPIRAL_PHASE_WAVE_SCALE = 4.8;
+const SPIRAL_Y_SCALE = 0.74;
+const SPIRAL_FRONT_PHASE = Math.PI * 0.5;
+const SPIRAL_FOREGROUND_DEPTH = 0.24;
+const SPIRAL_BACKGROUND_DEPTH = 0.18;
+const SPIRAL_FRONT_WIDTH_BOOST = 1.14;
+const SPIRAL_BACK_WIDTH_DROP = 0.86;
+const SPIRAL_FRONT_ALPHA_BOOST = 1.18;
+const SPIRAL_BACK_ALPHA_DROP = 0.72;
+const CHARGE_COLOR_POWER = 0.65;
+const CHARGE_COLOR_RISE_SPEED = 0.08;
+const CHARGE_COLOR_FADE_SPEED = 0.045;
+const RELEASE_COLOR_RESIDUE_SCALE = 0.72;
+const BRIGHT_SPIRAL_BLUR_ACTIVE = 4;
+const BRIGHT_SPIRAL_BLUR_IDLE = 12;
+const DARK_SPIRAL_BLUR_ACTIVE = 1;
+const DARK_SPIRAL_BLUR_IDLE = 5;
 const BRIGHT_SPIRAL_BANDS = [
-  { start: 0.2, widthScale: 0.052, color: "rgba(255,255,255,.92)", alpha: 0.92, phaseScale: 1 },
-  { start: 2.3, widthScale: 0.044, color: "rgba(255,255,255,.72)", alpha: 0.72, phaseScale: 0.92 },
-  { start: 4.2, widthScale: 0.036, color: "rgba(255,228,229,.7)", alpha: 0.66, phaseScale: 1.08 }
+  { start: 0.2, widthScale: 0.052, color: "rgba(255,255,255,.92)", colorAlpha: 0.92, alpha: 0.92, phaseScale: 1.04, depth: 0.82, baseRgb: [255, 255, 255], chargedRgb: [238, 82, 220], chargeMix: 0.56 },
+  { start: 2.3, widthScale: 0.044, color: "rgba(255,255,255,.72)", colorAlpha: 0.72, alpha: 0.72, phaseScale: 0.94, depth: 0.56, baseRgb: [255, 248, 250], chargedRgb: [176, 24, 182], chargeMix: 0.9 },
+  { start: 4.2, widthScale: 0.036, color: "rgba(255,228,229,.7)", colorAlpha: 0.7, alpha: 0.66, phaseScale: 0.86, depth: 0.34, baseRgb: [255, 228, 229], chargedRgb: [116, 10, 146], chargeMix: 1 }
 ];
 const DARK_SPIRAL_BANDS = [
-  { start: 1.2, widthScale: 0.038, color: "rgba(126,58,58,.42)", activeAlpha: 0.54, idleAlpha: 0.82, phaseScale: 0.84 },
-  { start: 3.4, widthScale: 0.03, color: "rgba(126,58,58,.34)", activeAlpha: 0.42, idleAlpha: 0.7, phaseScale: 1.16 }
+  { start: 1.2, widthScale: 0.038, color: "rgba(126,58,58,.42)", colorAlpha: 0.42, activeAlpha: 0.54, idleAlpha: 0.82, phaseScale: 0.78, depth: 0.24, baseRgb: [126, 58, 58], chargedRgb: [68, 8, 108], chargeMix: 0.82 },
+  { start: 3.4, widthScale: 0.03, color: "rgba(126,58,58,.34)", colorAlpha: 0.34, activeAlpha: 0.42, idleAlpha: 0.7, phaseScale: 0.72, depth: 0.14, baseRgb: [126, 58, 58], chargedRgb: [48, 6, 96], chargeMix: 0.78 }
 ];
 
 // 柔和内层环纹理参数。
 const RING_COUNT_ACTIVE = 16;
-const RING_COUNT_IDLE = 14;
+const RING_COUNT_IDLE = 16;
 const RING_IDLE_STEP_INCREMENT = 1;
 const RING_RADIUS_START = 0.03;
 const RING_RADIUS_STEP = 0.017;
 const RING_Y_SCALE = 0.84;
-const RING_ROTATION_SCALE = 0.34;
-const RING_ROTATION_OFFSET = 0.2;
+const RING_ROTATION_SCALE = 0.42;
+const RING_ROTATION_OFFSET = 0.28;
 const RING_ALPHA_SCALE = 0.16;
+const RING_GRID_ALPHA_BOOST = 0.08;
 const RING_LINE_WIDTH_ACTIVE = 1.2;
-const RING_LINE_WIDTH_IDLE = 0.7;
+const RING_LINE_WIDTH_IDLE = 0.82;
+const RING_GRID_WIDTH_BOOST = 0.28;
 
 // 中心能量脉冲参数。
 const CORE_PULSE_THRESHOLD = 0.82;
@@ -151,6 +190,16 @@ const CENTER_GLOW_RADIUS_SCALE = 0.36;
 const CENTER_GLOW_MID_STOP = 0.42;
 const CENTER_GLOW_CENTER_ALPHA = 0.32;
 const CENTER_GLOW_MID_ALPHA = 0.12;
+const CENTER_DEPTH_RADIUS_SCALE = 0.11;
+const CENTER_DEPTH_MID_STOP = 0.46;
+const CENTER_DEPTH_CENTER_ALPHA = 0.08;
+const CENTER_DEPTH_MID_ALPHA = 0.05;
+const CENTER_POINT_RADIUS_SCALE = 0.038;
+const CENTER_POINT_HALO_RADIUS_SCALE = 0.095;
+const CENTER_POINT_BASE_ALPHA = 0.46;
+const CENTER_POINT_CHARGE_ALPHA = 0.36;
+const CENTER_POINT_RELEASE_ALPHA = 0.42;
+const CENTER_POINT_HALO_ALPHA = 0.2;
 const COMPRESSED_CORE_THRESHOLD = 0.72;
 const RELEASE_CORE_THRESHOLD = 0.05;
 const COMPRESSED_CORE_RADIUS_SCALE = 0.12;
@@ -170,8 +219,10 @@ const CHARGE_SHADE_EDGE_ALPHA = 0.38;
 
 // 释放冲击波参数。
 const RELEASE_TRIGGER_THRESHOLD = 0.08;
-const SHOCKWAVE_COUNT = 4;
-const SHOCKWAVE_MAX_ACTIVE = 6;
+const RELEASE_IDLE_BLOCK_THRESHOLD = 0.05;
+const RELEASE_IDLE_GRACE_MS = 1200;
+const SHOCKWAVE_COUNT = 3;
+const SHOCKWAVE_MAX_ACTIVE = 4;
 const SHOCKWAVE_RADIUS_STEP = 24;
 const SHOCKWAVE_ALPHA_SCALE = 1.28;
 const SHOCKWAVE_ALPHA_DROP = 0.15;
@@ -188,17 +239,18 @@ const SHOCKWAVE_INNER_HALO_WIDTH = 2;
 const SHOCKWAVE_OUTER_HALO_WIDTH = 3;
 const SHOCKWAVE_HALO_MID_STOP = 0.5;
 const SHOCKWAVE_HALO_ALPHA_SCALE = 0.22;
+const SHOCKWAVE_HALO_DRAW_THRESHOLD = 0.08;
 
 // 最终边缘暗角参数。
 const SHADE_INNER_RADIUS_SCALE = 0.12;
 const SHADE_OUTER_RADIUS_SCALE = 0.9;
 const SHADE_FIRST_STOP = 0.48;
 const SHADE_SECOND_STOP = 0.72;
-const SHADE_IDLE_DARK_ALPHA = 0.22;
+const SHADE_IDLE_DARK_ALPHA = 0.14;
 const SHADE_ACTIVE_ALPHA = 0.1;
-const SHADE_IDLE_ALPHA = 0.28;
+const SHADE_IDLE_ALPHA = 0.18;
 const SHADE_EDGE_ACTIVE_ALPHA = 0.24;
-const SHADE_EDGE_IDLE_ALPHA = 0.52;
+const SHADE_EDGE_IDLE_ALPHA = 0.38;
 
 // 指针交互参数。
 const PRIMARY_POINTER_BUTTON = 0;
@@ -214,6 +266,8 @@ const COLOR_WHITE = "#fff";
 const RGB_WHITE = "255,255,255";
 const RGB_CORE_PULSE_MID = "255,238,241";
 const RGB_CORE_PULSE_OUTER = "255,210,218";
+const RGB_GRID_WARP_VERTICAL = "180,44,112";
+const RGB_GRID_WARP_HORIZONTAL = "224,82,142";
 const RGB_COMPRESSED_CORE_MID = "255,235,236";
 const RGB_CHARGE_SHADE_CENTER = "60,10,25";
 const RGB_CHARGE_SHADE_MID = "90,20,35";
@@ -221,10 +275,14 @@ const RGB_CHARGE_SHADE_EDGE = "80,12,30";
 const RGB_SHADE_RED = "104,35,35";
 const RGB_SHADE_DARK = "24,8,16";
 
+// 满蓄能临界状态参数。
+const OVERLOAD_SHAKE_STRENGTH = 1.4;
+
 const canvas = document.getElementById("vortexCanvas");
 const ctx = canvas.getContext("2d");
 const introOverlay = document.getElementById("introOverlay");
 const vortexCredit = document.getElementById("vortexCredit");
+const chargeMeter = document.getElementById("chargeMeter");
 
 let dpr = Math.min(MAX_DEVICE_PIXEL_RATIO, window.devicePixelRatio || FALLBACK_DEVICE_PIXEL_RATIO); // 当前设备像素比，用于高清屏适配。
 let width = window.innerWidth; // 画布显示宽度。
@@ -237,18 +295,28 @@ let pressing = false; // 指针是否处于按下状态。
 let isPressed = false; // 是否正在蓄能，用于驱动蓄能动画。
 let pressStartTime = ZERO_VALUE; // 本次按下开始时间。
 let chargePower = ZERO_VALUE; // 当前蓄能强度，范围约为 0 到 1。
+let visualChargePower = ZERO_VALUE; // 平滑后的蓄能视觉强度，避免点按时颜色和尺寸突然跳变。
 let releasePower = ZERO_VALUE; // 释放后的残余能量强度，用于闪光、震动和冲击效果。
 let currentReleaseIntensity = ZERO_VALUE; // 当前释放强度，由蓄能值非线性映射得到，用于统一控制释放反馈层级。
+let chargedColorFade = ZERO_VALUE; // 蓄能后的颜色残留强度，让松开后深粉色平滑退回。
+let inheritedColorFloor = ZERO_VALUE; // 下一次蓄能继承上一次释放余韵的颜色下限，避免重新按下时跳浅。
+let chargeMeterLevel = ZERO_VALUE; // 蓄能反馈条的平滑显示值。
+let chargeMeterVisibleUntil = ZERO_VALUE; // 松开后蓄能反馈条继续淡出的截止时间。
+let isOverloaded = false; // 是否进入满蓄能过载状态。
+let overloadStartTime = ZERO_VALUE; // 过载倒计时开始时间。
 let releaseShakeAmplitude = ZERO_VALUE; // 释放后的独立余震强度，叠加在漩涡中心位置上。
 let shockwaves = []; // 释放时生成的冲击波列表。
 let lastFrameTime = ZERO_VALUE; // 上一帧时间戳，用于计算帧间隔。
 let vortexCenter = { x: INITIAL_CENTER_X, y: INITIAL_CENTER_Y }; // 漩涡当前中心位置，使用屏幕比例坐标。
 let targetCenter = { x: INITIAL_CENTER_X, y: INITIAL_CENTER_Y }; // 指针指向的目标中心位置。
-let lastMouseMoveTime = performance.now(); // 最近一次指针移动时间，用于判断静置状态。
+let lastInteractionTime = performance.now(); // 最近一次有效交互时间，用于判断自动休眠状态。
+let releaseGraceUntil = ZERO_VALUE; // 释放后暂停自动休眠计时的截止时间，避免余震被休眠打断。
 let isIdle = false; // 当前是否进入静置休眠状态。
 let idleFactor = FULL_ALPHA; // 静置状态过渡系数，用于平滑变暗和减速。
+let manualPauseVisualFactor = FULL_ALPHA; // Space 切换时的视觉休眠系数，用于避免颜色、光圈和半径发生跳变。
 let breathingFactor = FULL_ALPHA; // 全局呼吸脉动系数，影响半径、光晕和吸引强度。
 let isManuallyPaused = true; // 是否处于手动强制休眠状态，初始为 true 以降低页面刚打开时的视觉冲击。
+let warpedGridPoint = { x: ZERO_VALUE, y: ZERO_VALUE, influence: ZERO_VALUE }; // 网格扭曲计算复用点，避免每帧产生大量临时对象。
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -260,6 +328,23 @@ function lerp(start, end, amount) {
 
 function rgba(rgb, alpha) {
   return `rgba(${rgb},${alpha})`;
+}
+
+function lerpRgb(start, end, amount) {
+  return `${Math.round(lerp(start[0], end[0], amount))},${Math.round(lerp(start[1], end[1], amount))},${Math.round(lerp(start[2], end[2], amount))}`;
+}
+
+function getChargedBandColor(band, colorCharge) {
+  if (!band.baseRgb || colorCharge <= ZERO_VALUE) {
+    return band.color;
+  }
+
+  return rgba(lerpRgb(band.baseRgb, band.chargedRgb, colorCharge * band.chargeMix), band.colorAlpha);
+}
+
+// 交互活跃标记模块：鼠标、键盘和释放反馈都会刷新自动休眠计时起点。
+function markInteractionActive(time = performance.now()) {
+  lastInteractionTime = time;
 }
 
 // 启动引导层模块：休眠时显示中央序章，运行时转化为左下角 HUD。
@@ -277,7 +362,56 @@ function updateIntroOverlay() {
   }
 }
 
-// 手动休眠模块：通过空格键切换强制休眠，并清除蓄能与释放残留。
+// 蓄能读数模块：用微型能量核心实时反馈当前蓄能程度。
+function updateChargeMeter(now, time) {
+  if (!chargeMeter) {
+    return;
+  }
+
+  const releaseResidue = clamp(releasePower * 0.82, ZERO_VALUE, FULL_ALPHA);
+  const targetLevel = isPressed ? chargePower : releaseResidue;
+  const shouldShow = !isManuallyPaused && (isPressed || releaseResidue > 0.04 || now < chargeMeterVisibleUntil);
+  chargeMeterLevel = lerp(chargeMeterLevel, targetLevel, isPressed ? 0.16 : 0.08);
+
+  const level = clamp(chargeMeterLevel, ZERO_VALUE, FULL_ALPHA);
+  const fullPulse = level > 0.94
+    ? (Math.sin(time * 0.0038) + FULL_ALPHA) * HALF_SCREEN_FACTOR
+    : ZERO_VALUE;
+  const spinSpeed = 0.018 + level * 0.052 + releaseResidue * 0.028;
+  const rotation = (time * spinSpeed) % 360;
+  const reverseRotation = (-time * (0.014 + level * 0.038)) % 360;
+
+  chargeMeter.style.setProperty("--charge-level", String(level));
+  chargeMeter.style.setProperty("--charge-pulse", String(fullPulse));
+  chargeMeter.style.setProperty("--core-rotation", `${rotation}deg`);
+  chargeMeter.style.setProperty("--core-rotation-reverse", `${reverseRotation}deg`);
+  chargeMeter.style.setProperty("--meter-opacity", String(0.54 + level * 0.34));
+  chargeMeter.style.setProperty("--core-scale", String(0.92 + level * 0.1 + fullPulse * 0.025));
+  chargeMeter.style.setProperty("--ring-alpha", String(0.18 + level * 0.34));
+  chargeMeter.style.setProperty("--ring-opacity", String(0.46 + level * 0.38));
+  chargeMeter.style.setProperty("--arc-alpha", String(0.34 + level * 0.34));
+  chargeMeter.style.setProperty("--inner-arc-alpha", String(0.28 + level * 0.3));
+  chargeMeter.style.setProperty("--core-alpha", String(0.8 + level * 0.1));
+  chargeMeter.style.setProperty("--core-glow-alpha", String(0.14 + level * 0.18));
+  chargeMeter.style.setProperty("--pulse-glow-alpha", String(0.08 + fullPulse * 0.12));
+  chargeMeter.style.setProperty("--soft-glow-alpha", String(0.08 + level * 0.14));
+  chargeMeter.style.setProperty("--core-dot-alpha", String(0.22 + level * 0.32));
+  chargeMeter.style.setProperty("--core-dot-glow-alpha", String(0.16 + level * 0.22));
+  chargeMeter.style.setProperty("--core-glow-size", `${6 + level * 9}px`);
+  chargeMeter.style.setProperty("--core-halo-size", `${10 + level * 14}px`);
+  chargeMeter.style.setProperty("--core-void-glow-size", `${6 + level * 8}px`);
+  chargeMeter.style.setProperty("--core-dot-glow-size", `${5 + level * 8}px`);
+  chargeMeter.style.setProperty("--void-scale", String(0.92 + level * 0.08 + fullPulse * 0.035));
+  chargeMeter.style.setProperty("--outer-arc-mid", `${54 + level * 82}deg`);
+  chargeMeter.style.setProperty("--outer-arc-end", `${86 + level * 122}deg`);
+  chargeMeter.style.setProperty("--inner-arc-mid", `${42 + level * 76}deg`);
+  chargeMeter.style.setProperty("--inner-arc-end", `${74 + level * 112}deg`);
+  chargeMeter.style.setProperty("--full-ring-alpha", String(0.52 + fullPulse * 0.22));
+  chargeMeter.classList.toggle("is-visible", shouldShow);
+  chargeMeter.classList.toggle("is-full", level > 0.94);
+}
+
+// 手动休眠模块：通过空格键切换强制休眠，视觉参数交给主循环平滑过渡。
 function toggleManualPause() {
   isManuallyPaused = !isManuallyPaused;
 
@@ -285,12 +419,14 @@ function toggleManualPause() {
     isPressed = false;
     pressing = false;
     chargePower = ZERO_VALUE;
-    releasePower = ZERO_VALUE;
-    currentReleaseIntensity = ZERO_VALUE;
-    releaseShakeAmplitude = ZERO_VALUE;
-    shockwaves = [];
+    chargeMeterLevel = ZERO_VALUE;
+    chargeMeterVisibleUntil = ZERO_VALUE;
+    isOverloaded = false;
+    overloadStartTime = ZERO_VALUE;
+    releaseGraceUntil = ZERO_VALUE;
   } else {
-    lastMouseMoveTime = performance.now();
+    chargePower = ZERO_VALUE;
+    markInteractionActive();
   }
 
   updateIntroOverlay();
@@ -301,8 +437,13 @@ function startCharge(direction) {
   targetSpinDirection = direction;
   pressing = true;
   isPressed = true;
+  chargePower = ZERO_VALUE;
+  inheritedColorFloor = chargedColorFade;
   pressStartTime = performance.now();
-  lastMouseMoveTime = pressStartTime;
+  releaseGraceUntil = ZERO_VALUE;
+  isOverloaded = false;
+  overloadStartTime = ZERO_VALUE;
+  markInteractionActive(pressStartTime);
   updateIntroOverlay();
 }
 
@@ -319,15 +460,18 @@ function resize() {
 }
 
 // 螺旋光带模块：绘制漩涡中的一条弯曲光带。
-function drawSpiralBand(cx, cy, maxRadius, start, widthScale, color, alpha, phase, stepIncrement) {
+function drawSpiralBand(cx, cy, maxRadius, start, widthScale, color, alpha, phase, stepIncrement, lineDepth, turnMultiplier) {
   ctx.beginPath();
   for (let step = ZERO_VALUE; step <= SPIRAL_STEP_COUNT; step += stepIncrement) {
     const t = step / SPIRAL_STEP_COUNT;
     const radius = maxRadius * Math.pow(t, SPIRAL_RADIUS_POWER);
-    const turn = start + t * Math.PI * SPIRAL_TURN_MULTIPLIER + phase;
+    const turn = start + t * Math.PI * turnMultiplier + phase;
+    const frontAmount = (Math.sin(turn - SPIRAL_FRONT_PHASE) + FULL_ALPHA) * HALF_SCREEN_FACTOR;
+    const depthScale = lerp(FULL_ALPHA - SPIRAL_BACKGROUND_DEPTH, FULL_ALPHA + SPIRAL_FOREGROUND_DEPTH, frontAmount);
     const wave = Math.sin(t * SPIRAL_WAVE_FREQUENCY + phase * SPIRAL_PHASE_WAVE_SCALE + start) * widthScale;
-    const x = cx + Math.cos(turn) * (radius + wave);
-    const y = cy + Math.sin(turn) * (radius + wave) * SPIRAL_Y_SCALE;
+    const depthRadius = (radius + wave) * depthScale;
+    const x = cx + Math.cos(turn) * depthRadius;
+    const y = cy + Math.sin(turn) * depthRadius * SPIRAL_Y_SCALE;
 
     if (step === ZERO_VALUE) {
       ctx.moveTo(x, y);
@@ -337,8 +481,8 @@ function drawSpiralBand(cx, cy, maxRadius, start, widthScale, color, alpha, phas
   }
 
   ctx.strokeStyle = color;
-  ctx.globalAlpha = alpha;
-  ctx.lineWidth = widthScale;
+  ctx.globalAlpha = alpha * lerp(SPIRAL_BACK_ALPHA_DROP, SPIRAL_FRONT_ALPHA_BOOST, lineDepth);
+  ctx.lineWidth = widthScale * lerp(SPIRAL_BACK_WIDTH_DROP, SPIRAL_FRONT_WIDTH_BOOST, lineDepth);
   ctx.lineCap = "round";
   ctx.stroke();
 }
@@ -362,41 +506,118 @@ function drawBackground(idleAmount, releaseAmount) {
   ctx.restore();
 }
 
-// 释放闪光模块：在蓄能释放后绘制短暂的全屏闪光。
-function drawReleaseFlash(releaseAmount) {
+// 释放闪光模块：让白化沿冲击波从中心向外传递，而不是整屏同时闪白。
+function drawReleaseFlash(cx, cy, maxRadius, releaseAmount) {
   if (releaseAmount <= RELEASE_FLASH_THRESHOLD) {
     return;
   }
 
+  const leadingWave = shockwaves.length > ZERO_VALUE ? shockwaves[ZERO_VALUE] : null;
+  const rawFrontRadius = leadingWave ? leadingWave.radius : maxRadius * 0.08;
+  const frontRadius = rawFrontRadius * RELEASE_FLASH_FRONT_SPEED_SCALE;
+  const frontWidth = maxRadius * RELEASE_FLASH_FRONT_WIDTH_SCALE;
+  const frontProgress = clamp(frontRadius / Math.max(FULL_ALPHA, maxRadius), ZERO_VALUE, FULL_ALPHA);
+  const flashAlpha = Math.min(RELEASE_FLASH_MAX_ALPHA, releaseAmount * RELEASE_FLASH_ALPHA_SCALE);
+
   ctx.save();
   ctx.globalCompositeOperation = "screen";
-  ctx.globalAlpha = Math.min(RELEASE_FLASH_MAX_ALPHA, releaseAmount * RELEASE_FLASH_ALPHA_SCALE);
-  ctx.fillStyle = COLOR_WHITE;
+
+  const innerGlow = ctx.createRadialGradient(cx, cy, ZERO_VALUE, cx, cy, Math.max(frontRadius, maxRadius * 0.12));
+  innerGlow.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, flashAlpha * RELEASE_FLASH_INNER_ALPHA_SCALE));
+  innerGlow.addColorStop(0.62, rgba(RGB_CORE_PULSE_MID, flashAlpha * RELEASE_FLASH_INNER_ALPHA_SCALE * (FULL_ALPHA - frontProgress * 0.4)));
+  innerGlow.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
+  ctx.fillStyle = innerGlow;
+  ctx.fillRect(-DRAW_OVERSCAN, -DRAW_OVERSCAN, width + DRAW_OVERSCAN * OVERSCAN_SIZE_SCALE, height + DRAW_OVERSCAN * OVERSCAN_SIZE_SCALE);
+
+  const frontGlow = ctx.createRadialGradient(
+    cx,
+    cy,
+    Math.max(ZERO_VALUE, frontRadius - frontWidth),
+    cx,
+    cy,
+    frontRadius + frontWidth
+  );
+  frontGlow.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, ZERO_VALUE));
+  frontGlow.addColorStop(0.52, rgba(RGB_WHITE, flashAlpha * RELEASE_FLASH_FRONT_ALPHA_SCALE));
+  frontGlow.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
+  ctx.fillStyle = frontGlow;
   ctx.fillRect(-DRAW_OVERSCAN, -DRAW_OVERSCAN, width + DRAW_OVERSCAN * OVERSCAN_SIZE_SCALE, height + DRAW_OVERSCAN * OVERSCAN_SIZE_SCALE);
   ctx.restore();
 }
 
 // 网格模块：让背景网格向漩涡中心发生轻微扭曲。
-function drawWarpedGrid(cx, cy, gridAlpha, chargeAmount, releaseAmount) {
+function warpGridPoint(x, y, cx, cy, influenceRadius, swirlStrength, pullStrength, releaseAmount, flowPhase) {
+  const dx = x - cx;
+  const dy = y - cy;
+  const distance = Math.hypot(dx, dy);
+  const baseInfluence = clamp(FULL_ALPHA - distance / influenceRadius, ZERO_VALUE, FULL_ALPHA);
+  const influence = Math.pow(baseInfluence, 1.35);
+
+  if (influence <= ZERO_VALUE) {
+    warpedGridPoint.x = x;
+    warpedGridPoint.y = y;
+    warpedGridPoint.influence = ZERO_VALUE;
+    return warpedGridPoint;
+  }
+
+  const angle = Math.atan2(dy, dx);
+  const radius = distance * (FULL_ALPHA - pullStrength * influence + releaseAmount * GRID_RELEASE_EXPANSION * influence);
+  const centerPull = GRID_CENTER_DENSITY_PULL * influence * influence * influence;
+  const angleOffset = spinDirection * (
+    influence * influence * swirlStrength +
+    Math.sin(flowPhase + distance * 0.008) * influence * 0.075
+  );
+
+  warpedGridPoint.x = cx + Math.cos(angle + angleOffset) * radius;
+  warpedGridPoint.y = cy + Math.sin(angle + angleOffset) * radius * (FULL_ALPHA - centerPull);
+  warpedGridPoint.influence = influence;
+  return warpedGridPoint;
+}
+
+function drawWarpedGrid(cx, cy, gridAlpha, chargeAmount, releaseAmount, maxRadius, time, idleAmount) {
   ctx.save();
   ctx.globalCompositeOperation = "screen";
-  ctx.strokeStyle = rgba(RGB_WHITE, gridAlpha);
   ctx.lineWidth = GRID_LINE_WIDTH;
 
   const gridGap = Math.max(MIN_GRID_GAP, Math.min(width, height) * GRID_SCREEN_SCALE);
-  const gridWarp = GRID_BASE_WARP + chargeAmount * CHARGE_GRID_WARP + releaseAmount * RELEASE_GRID_WARP;
+  const flowPhase = time * GRID_FLOW_TIME_SCALE;
+  const influenceRadius = maxRadius * (GRID_INFLUENCE_RADIUS_SCALE + chargeAmount * GRID_CHARGE_INFLUENCE_BOOST);
+  const swirlStrength = (GRID_SWIRL_STRENGTH + chargeAmount * GRID_CHARGE_SWIRL_BOOST + releaseAmount * GRID_RELEASE_SWIRL_BOOST) * lerp(FULL_ALPHA, 0.46, idleAmount);
+  const pullStrength = GRID_PULL_STRENGTH + chargeAmount * CHARGE_GRID_WARP + releaseAmount * RELEASE_GRID_WARP;
+  const segmentHeight = height / GRID_SEGMENT_COUNT;
+  const segmentWidth = width / GRID_SEGMENT_COUNT;
 
-  for (let x = (cx % gridGap) - gridGap; x < width + gridGap; x += gridGap) {
+  for (let x = -gridGap; x < width + gridGap; x += gridGap) {
     ctx.beginPath();
-    ctx.moveTo(x, ZERO_VALUE);
-    ctx.lineTo(x + (cy - height * HALF_SCREEN_FACTOR) * gridWarp, height);
+    let strongestInfluence = ZERO_VALUE;
+    for (let i = ZERO_VALUE; i <= GRID_SEGMENT_COUNT; i += 1) {
+      const y = i * segmentHeight;
+      const warped = warpGridPoint(x, y, cx, cy, influenceRadius, swirlStrength, pullStrength, releaseAmount, flowPhase);
+      strongestInfluence = Math.max(strongestInfluence, warped.influence);
+      if (i === ZERO_VALUE) {
+        ctx.moveTo(warped.x, warped.y);
+      } else {
+        ctx.lineTo(warped.x, warped.y);
+      }
+    }
+    ctx.strokeStyle = rgba(RGB_GRID_WARP_VERTICAL, gridAlpha * (FULL_ALPHA + strongestInfluence * GRID_NEAR_ALPHA_BOOST));
     ctx.stroke();
   }
 
-  for (let y = (cy % gridGap) - gridGap; y < height + gridGap; y += gridGap) {
+  for (let y = -gridGap; y < height + gridGap; y += gridGap) {
     ctx.beginPath();
-    ctx.moveTo(ZERO_VALUE, y);
-    ctx.lineTo(width, y + (cx - width * HALF_SCREEN_FACTOR) * gridWarp);
+    let strongestInfluence = ZERO_VALUE;
+    for (let i = ZERO_VALUE; i <= GRID_SEGMENT_COUNT; i += 1) {
+      const x = i * segmentWidth;
+      const warped = warpGridPoint(x, y, cx, cy, influenceRadius, swirlStrength, pullStrength, releaseAmount, flowPhase);
+      strongestInfluence = Math.max(strongestInfluence, warped.influence);
+      if (i === ZERO_VALUE) {
+        ctx.moveTo(warped.x, warped.y);
+      } else {
+        ctx.lineTo(warped.x, warped.y);
+      }
+    }
+    ctx.strokeStyle = rgba(RGB_GRID_WARP_HORIZONTAL, gridAlpha * (FULL_ALPHA + strongestInfluence * GRID_NEAR_ALPHA_BOOST));
     ctx.stroke();
   }
 
@@ -404,7 +625,9 @@ function drawWarpedGrid(cx, cy, gridAlpha, chargeAmount, releaseAmount) {
 }
 
 // 漩涡主体模块：叠加明亮和暗色螺旋层，形成主体旋转感。
-function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAmount, spiralStepIncrement) {
+function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAmount, spiralStepIncrement, chargeAmount, colorCharge) {
+  const turnMultiplier = lerp(SPIRAL_TURN_MULTIPLIER, SPIRAL_CHARGE_TURN_MULTIPLIER, chargeAmount);
+
   ctx.save();
   ctx.filter = `blur(${lerp(BRIGHT_SPIRAL_BLUR_ACTIVE, BRIGHT_SPIRAL_BLUR_IDLE, idleAmount)}px)`;
   ctx.globalCompositeOperation = "screen";
@@ -415,10 +638,12 @@ function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAm
       maxRadius,
       band.start,
       maxRadius * band.widthScale * attractionStrength,
-      band.color,
+      getChargedBandColor(band, colorCharge),
       band.alpha * glowAlpha,
       spin * band.phaseScale,
-      spiralStepIncrement
+      spiralStepIncrement,
+      band.depth,
+      turnMultiplier
     );
   });
   ctx.restore();
@@ -433,27 +658,30 @@ function drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleAm
       maxRadius,
       band.start,
       maxRadius * band.widthScale,
-      band.color,
+      getChargedBandColor(band, colorCharge),
       lerp(band.activeAlpha, band.idleAlpha, idleAmount),
       spin * band.phaseScale,
-      spiralStepIncrement
+      spiralStepIncrement,
+      band.depth,
+      turnMultiplier
     );
   });
   ctx.restore();
 }
 
 // 内层纹理模块：添加柔和的内部轨道纹理，不作为蓄能提示。
-function drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleAmount, ringStepIncrement) {
+function drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleAmount, ringStepIncrement, gridFieldStrength) {
   ctx.save();
   ctx.globalCompositeOperation = "screen";
 
   const ringCount = Math.round(lerp(RING_COUNT_ACTIVE, RING_COUNT_IDLE, idleAmount));
   for (let i = ZERO_VALUE; i < ringCount; i += ringStepIncrement) {
     const radius = maxRadius * (RING_RADIUS_START + i * RING_RADIUS_STEP);
+    const ringField = gridFieldStrength * (FULL_ALPHA - i / Math.max(FULL_ALPHA, ringCount));
     ctx.beginPath();
     ctx.ellipse(cx, cy, radius, radius * RING_Y_SCALE, spin * RING_ROTATION_SCALE + i * RING_ROTATION_OFFSET, ZERO_VALUE, FULL_CIRCLE);
-    ctx.strokeStyle = rgba(RGB_WHITE, RING_ALPHA_SCALE * glowAlpha);
-    ctx.lineWidth = lerp(RING_LINE_WIDTH_ACTIVE, RING_LINE_WIDTH_IDLE, idleAmount);
+    ctx.strokeStyle = rgba(RGB_CORE_PULSE_MID, (RING_ALPHA_SCALE + ringField * RING_GRID_ALPHA_BOOST) * glowAlpha);
+    ctx.lineWidth = lerp(RING_LINE_WIDTH_ACTIVE, RING_LINE_WIDTH_IDLE, idleAmount) + ringField * RING_GRID_WIDTH_BOOST;
     ctx.stroke();
   }
 
@@ -494,13 +722,44 @@ function drawCoreEnergyPulse(cx, cy, maxRadius, chargeAmount, time) {
 }
 
 // 中心发光模块：融合常驻核心光晕和高能压缩核心。
-function drawCenterGlow(cx, cy, maxRadius, glowAlpha, chargeAmount, releaseAmount) {
+function drawCenterGlow(cx, cy, maxRadius, glowAlpha, chargeAmount, releaseAmount, wakeSuppression) {
+  const centerDepth = ctx.createRadialGradient(cx, cy, ZERO_VALUE, cx, cy, maxRadius * CENTER_DEPTH_RADIUS_SCALE);
+  centerDepth.addColorStop(ZERO_VALUE, rgba(RGB_SHADE_DARK, CENTER_DEPTH_CENTER_ALPHA * lerp(FULL_ALPHA, 0.72, chargeAmount)));
+  centerDepth.addColorStop(CENTER_DEPTH_MID_STOP, rgba(RGB_SHADE_RED, CENTER_DEPTH_MID_ALPHA));
+  centerDepth.addColorStop(FULL_ALPHA, rgba(RGB_SHADE_RED, ZERO_VALUE));
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  ctx.fillStyle = centerDepth;
+  ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+  ctx.restore();
+
   const centerGlow = ctx.createRadialGradient(cx, cy, ZERO_VALUE, cx, cy, maxRadius * CENTER_GLOW_RADIUS_SCALE);
-  centerGlow.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, CENTER_GLOW_CENTER_ALPHA * glowAlpha));
-  centerGlow.addColorStop(CENTER_GLOW_MID_STOP, rgba(RGB_COMPRESSED_CORE_MID, CENTER_GLOW_MID_ALPHA * glowAlpha));
+  centerGlow.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, CENTER_GLOW_CENTER_ALPHA * glowAlpha * wakeSuppression));
+  centerGlow.addColorStop(CENTER_GLOW_MID_STOP, rgba(RGB_COMPRESSED_CORE_MID, CENTER_GLOW_MID_ALPHA * glowAlpha * wakeSuppression));
   centerGlow.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
   ctx.fillStyle = centerGlow;
   ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+
+  const pointPower = clamp(chargeAmount * CENTER_POINT_CHARGE_ALPHA + releaseAmount * CENTER_POINT_RELEASE_ALPHA, ZERO_VALUE, FULL_ALPHA);
+  const pointGlow = ctx.createRadialGradient(cx, cy, ZERO_VALUE, cx, cy, maxRadius * CENTER_POINT_HALO_RADIUS_SCALE);
+  pointGlow.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, (CENTER_POINT_BASE_ALPHA + pointPower) * wakeSuppression));
+  pointGlow.addColorStop(0.28, rgba(RGB_COMPRESSED_CORE_MID, (CENTER_POINT_HALO_ALPHA + pointPower * 0.26) * wakeSuppression));
+  pointGlow.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.fillStyle = pointGlow;
+  ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+  ctx.restore();
+
+  const centerPoint = ctx.createRadialGradient(cx, cy, ZERO_VALUE, cx, cy, maxRadius * CENTER_POINT_RADIUS_SCALE);
+  centerPoint.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, (0.76 + pointPower * 0.22) * wakeSuppression));
+  centerPoint.addColorStop(0.52, rgba(RGB_CORE_PULSE_MID, (0.34 + pointPower * 0.22) * wakeSuppression));
+  centerPoint.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.fillStyle = centerPoint;
+  ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+  ctx.restore();
 
   if (chargeAmount <= COMPRESSED_CORE_THRESHOLD && releaseAmount <= RELEASE_CORE_THRESHOLD) {
     return;
@@ -557,19 +816,21 @@ function drawShockwaves() {
     ctx.ellipse(wave.x, wave.y, wave.radius, wave.radius * SHOCKWAVE_Y_SCALE, ZERO_VALUE, ZERO_VALUE, FULL_CIRCLE);
     ctx.stroke();
 
-    const halo = ctx.createRadialGradient(
-      wave.x,
-      wave.y,
-      Math.max(ZERO_VALUE, wave.radius - wave.width * SHOCKWAVE_INNER_HALO_WIDTH),
-      wave.x,
-      wave.y,
-      wave.radius + wave.width * SHOCKWAVE_OUTER_HALO_WIDTH
-    );
-    halo.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, ZERO_VALUE));
-    halo.addColorStop(SHOCKWAVE_HALO_MID_STOP, rgba(RGB_WHITE, wave.alpha * SHOCKWAVE_HALO_ALPHA_SCALE));
-    halo.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
-    ctx.fillStyle = halo;
-    ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+    if (wave.alpha > SHOCKWAVE_HALO_DRAW_THRESHOLD) {
+      const halo = ctx.createRadialGradient(
+        wave.x,
+        wave.y,
+        Math.max(ZERO_VALUE, wave.radius - wave.width * SHOCKWAVE_INNER_HALO_WIDTH),
+        wave.x,
+        wave.y,
+        wave.radius + wave.width * SHOCKWAVE_OUTER_HALO_WIDTH
+      );
+      halo.addColorStop(ZERO_VALUE, rgba(RGB_WHITE, ZERO_VALUE));
+      halo.addColorStop(SHOCKWAVE_HALO_MID_STOP, rgba(RGB_WHITE, wave.alpha * SHOCKWAVE_HALO_ALPHA_SCALE));
+      halo.addColorStop(FULL_ALPHA, rgba(RGB_WHITE, ZERO_VALUE));
+      ctx.fillStyle = halo;
+      ctx.fillRect(ZERO_VALUE, ZERO_VALUE, width, height);
+    }
     ctx.restore();
   });
 
@@ -593,44 +854,103 @@ function draw(time = ZERO_VALUE) {
   const now = performance.now();
 
   breathingFactor = FULL_ALPHA + Math.sin(time * BREATHING_TIME_SCALE) * BREATHING_AMPLITUDE;
-  const idleProgress = clamp((now - lastMouseMoveTime) / IDLE_THRESHOLD_MS, ZERO_VALUE, FULL_ALPHA);
-  const targetIdleFactor = isManuallyPaused ? FULL_ALPHA : isPressed ? ZERO_VALUE : idleProgress;
-  idleFactor = lerp(idleFactor, targetIdleFactor, IDLE_BLEND_SPEED);
-  isIdle = idleFactor > IDLE_COMPLETE_THRESHOLD;
 
   if (isPressed) {
     chargePower = clamp((now - pressStartTime) / FULL_CHARGE_DURATION_MS, ZERO_VALUE, FULL_ALPHA);
+    visualChargePower = lerp(visualChargePower, chargePower, CHARGE_COLOR_RISE_SPEED);
+    inheritedColorFloor = lerp(inheritedColorFloor, ZERO_VALUE, CHARGE_COLOR_FADE_SPEED);
+    chargedColorFade = lerp(
+      chargedColorFade,
+      Math.max(Math.pow(visualChargePower, CHARGE_COLOR_POWER), inheritedColorFloor),
+      CHARGE_COLOR_RISE_SPEED
+    );
+    if (chargePower >= FULL_ALPHA) {
+      if (!isOverloaded) {
+        isOverloaded = true;
+        overloadStartTime = now;
+      } else if (now - overloadStartTime >= OVERLOAD_DURATION_MS) {
+        triggerRelease(now, true);
+      }
+    }
   } else {
     chargePower = lerp(chargePower, ZERO_VALUE, CHARGE_FADE_SPEED);
+    visualChargePower = lerp(visualChargePower, ZERO_VALUE, CHARGE_COLOR_FADE_SPEED);
+    chargedColorFade = lerp(chargedColorFade, currentReleaseIntensity * RELEASE_COLOR_RESIDUE_SCALE, CHARGE_COLOR_FADE_SPEED);
+    inheritedColorFloor = ZERO_VALUE;
+    isOverloaded = false;
+    overloadStartTime = ZERO_VALUE;
   }
   const releaseFadeSpeed = lerp(RELEASE_FADE_FAST, RELEASE_FADE_SLOW, currentReleaseIntensity);
   releasePower = lerp(releasePower, ZERO_VALUE, releaseFadeSpeed);
   if (releasePower < RELEASE_FLASH_THRESHOLD) {
     currentReleaseIntensity = ZERO_VALUE;
   }
+  const isReleaseSettling = releasePower > RELEASE_IDLE_BLOCK_THRESHOLD ||
+    releaseShakeAmplitude > RELEASE_QUAKE_MIN_AMPLITUDE ||
+    shockwaves.length > ZERO_VALUE ||
+    now < releaseGraceUntil;
+
+  if (!isManuallyPaused && (isPressed || isReleaseSettling)) {
+    markInteractionActive(now);
+  }
+
+  const idleProgress = clamp((now - lastInteractionTime) / IDLE_THRESHOLD_MS, ZERO_VALUE, FULL_ALPHA);
+  const targetIdleFactor = isManuallyPaused ? FULL_ALPHA : isPressed || isReleaseSettling ? ZERO_VALUE : idleProgress;
+  const previousIdleFactor = idleFactor;
+  idleFactor = lerp(idleFactor, targetIdleFactor, IDLE_BLEND_SPEED);
+  manualPauseVisualFactor = lerp(
+    manualPauseVisualFactor,
+    isManuallyPaused ? FULL_ALPHA : ZERO_VALUE,
+    MANUAL_PAUSE_BLEND_SPEED
+  );
+  isIdle = idleFactor > IDLE_COMPLETE_THRESHOLD;
+  const sleepCompleteBlend = clamp(
+    (idleFactor - IDLE_COMPLETE_THRESHOLD) / (FULL_ALPHA - IDLE_COMPLETE_THRESHOLD),
+    ZERO_VALUE,
+    FULL_ALPHA
+  );
+  const sleepVisualFactor = Math.max(
+    manualPauseVisualFactor,
+    lerp(idleFactor, FULL_ALPHA, sleepCompleteBlend)
+  );
 
   const idleSpin = MIN_SPIN * IDLE_SPIN_FACTOR;
-  const baseSpin = lerp(MIN_SPIN, idleSpin, idleFactor);
-  const targetSpin = isPressed ? MAX_SPIN + chargePower * CHARGE_SPIN_BOOST : baseSpin + releasePower * RELEASE_SPIN_BOOST;
+  const baseSpin = lerp(MIN_SPIN, idleSpin, sleepVisualFactor);
+  const chargeSpinAmount = Math.pow(visualChargePower, CHARGE_SPIN_POWER);
+  const targetSpin = isPressed
+    ? lerp(baseSpin, MAX_SPIN + CHARGE_SPIN_BOOST, chargeSpinAmount)
+    : baseSpin + releasePower * RELEASE_SPIN_BOOST;
   const easing = isPressed ? CHARGE_ACCELERATION : RELEASE_DECELERATION;
-  const energyFactor = isPressed ? ACTIVE_ENERGY_SCALE : FULL_ALPHA;
-  const compressionFactor = FULL_ALPHA - chargePower * CHARGE_COMPRESSION_SCALE + releasePower * RELEASE_EXPANSION_SCALE;
-  const radiusFactor = breathingFactor * lerp(FULL_ALPHA, IDLE_RADIUS_SCALE, idleFactor) * energyFactor * compressionFactor;
+  const energyFactor = lerp(FULL_ALPHA, ACTIVE_ENERGY_SCALE, visualChargePower);
+  const compressionFactor = FULL_ALPHA - visualChargePower * CHARGE_COMPRESSION_SCALE + releasePower * RELEASE_EXPANSION_SCALE;
+  const chargeZoomFactor = FULL_ALPHA + visualChargePower * CHARGE_ZOOM_SCALE;
+  const radiusFactor = breathingFactor * lerp(FULL_ALPHA, IDLE_RADIUS_SCALE, sleepVisualFactor) * energyFactor * compressionFactor * chargeZoomFactor;
+  const isWakingFromSleep = !isManuallyPaused &&
+    (manualPauseVisualFactor > CHARGE_SHADE_THRESHOLD ||
+      (targetIdleFactor < previousIdleFactor && previousIdleFactor > HALF_SCREEN_FACTOR));
+  const wakeEnergyRelease = clamp(
+    (visualChargePower + releasePower) / 0.35,
+    ZERO_VALUE,
+    FULL_ALPHA
+  );
+  const wakeGlowSuppression = isWakingFromSleep
+    ? lerp(lerp(FULL_ALPHA, 0.08, Math.pow(sleepVisualFactor, 1.35)), FULL_ALPHA, wakeEnergyRelease)
+    : FULL_ALPHA;
   const glowAlpha = clamp(
-    lerp(GLOW_ACTIVE_ALPHA, GLOW_IDLE_ALPHA, idleFactor) *
+    lerp(GLOW_ACTIVE_ALPHA, GLOW_IDLE_ALPHA, sleepVisualFactor) *
     lerp(GLOW_BREATH_MIN, GLOW_BREATH_MAX, (breathingFactor - GLOW_BREATH_BASE) / GLOW_BREATH_RANGE) *
-    (FULL_ALPHA + chargePower * CHARGE_GLOW_BOOST + releasePower * RELEASE_GLOW_BOOST),
+    (FULL_ALPHA + visualChargePower * CHARGE_GLOW_BOOST + releasePower * RELEASE_GLOW_BOOST) *
+    clamp(wakeGlowSuppression, 0.08, FULL_ALPHA),
     MIN_GLOW_ALPHA,
     MAX_GLOW_ALPHA
   );
-  const attractionStrength = lerp(FULL_ALPHA, IDLE_ATTRACTION_SCALE, idleFactor) *
+  const attractionStrength = lerp(FULL_ALPHA, IDLE_ATTRACTION_SCALE, sleepVisualFactor) *
     breathingFactor *
-    (FULL_ALPHA + chargePower * CHARGE_ATTRACTION_BOOST - releasePower * RELEASE_ATTRACTION_DROP);
-  const gridAlpha = lerp(GRID_BASE_ALPHA, GRID_IDLE_ALPHA, idleFactor) *
-    (FULL_ALPHA + chargePower * CHARGE_GRID_ALPHA_BOOST + releasePower * RELEASE_GRID_ALPHA_BOOST);
-  const isHighEnergyFrame = isPressed || chargePower > CHARGE_SHADE_THRESHOLD || releasePower > RELEASE_FLASH_THRESHOLD;
-  const spiralStepIncrement = idleFactor > HALF_SCREEN_FACTOR && !isHighEnergyFrame ? SPIRAL_IDLE_STEP_INCREMENT : SPIRAL_STEP_INCREMENT;
-  const ringStepIncrement = idleFactor > HALF_SCREEN_FACTOR && !isHighEnergyFrame ? RING_IDLE_STEP_INCREMENT : SPIRAL_STEP_INCREMENT;
+    (FULL_ALPHA + visualChargePower * CHARGE_ATTRACTION_BOOST - releasePower * RELEASE_ATTRACTION_DROP);
+  const gridAlpha = lerp(GRID_BASE_ALPHA, GRID_IDLE_ALPHA, sleepVisualFactor) *
+    (FULL_ALPHA + visualChargePower * CHARGE_GRID_ALPHA_BOOST + releasePower * RELEASE_GRID_ALPHA_BOOST);
+  const isHighEnergyFrame = isPressed || visualChargePower > CHARGE_SHADE_THRESHOLD || releasePower > RELEASE_FLASH_THRESHOLD;
+  const spiralStepIncrement = sleepVisualFactor > HALF_SCREEN_FACTOR && !isHighEnergyFrame ? SPIRAL_IDLE_STEP_INCREMENT : SPIRAL_STEP_INCREMENT;
 
   spinDirection = lerp(spinDirection, targetSpinDirection, SPIN_DIRECTION_BLEND_SPEED);
   spinVelocity += (targetSpin - spinVelocity) * clamp(delta * easing, ZERO_VALUE, FULL_ALPHA);
@@ -651,7 +971,8 @@ function draw(time = ZERO_VALUE) {
   const releaseShakeOffsetY = Math.cos(time * RELEASE_QUAKE_Y_TIME_SCALE) * releaseShakeAmplitude * RELEASE_QUAKE_Y_SCALE;
   const cx = baseCx + releaseShakeOffsetX;
   const cy = baseCy + releaseShakeOffsetY;
-  const screenShake = chargePower * CHARGE_SHAKE_STRENGTH;
+  const overloadAmount = isOverloaded ? clamp((now - overloadStartTime) / OVERLOAD_DURATION_MS, ZERO_VALUE, FULL_ALPHA) : ZERO_VALUE;
+  const screenShake = visualChargePower * CHARGE_SHAKE_STRENGTH + overloadAmount * OVERLOAD_SHAKE_STRENGTH;
   const shakeX = Math.sin(time * SHAKE_X_TIME_SCALE) * screenShake;
   const shakeY = Math.cos(time * SHAKE_Y_TIME_SCALE) * screenShake;
   const maxRadius = Math.max(
@@ -659,24 +980,25 @@ function draw(time = ZERO_VALUE) {
     Math.hypot(width - cx, cy),
     Math.hypot(cx, height - cy),
     Math.hypot(width - cx, height - cy)
-  ) * OUTER_RADIUS_SCALE * radiusFactor;
+  ) * OUTER_RADIUS_SCALE * radiusFactor * MAIN_VORTEX_SCALE;
+
+  drawBackground(sleepVisualFactor, releasePower);
+  drawReleaseFlash(cx, cy, maxRadius, releasePower);
 
   ctx.save();
   ctx.translate(shakeX, shakeY);
 
-  drawBackground(idleFactor, releasePower);
-  drawReleaseFlash(releasePower);
-  drawWarpedGrid(cx, cy, gridAlpha, chargePower, releasePower);
-  drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, idleFactor, spiralStepIncrement);
-  drawInnerRingTexture(cx, cy, maxRadius, glowAlpha, idleFactor, ringStepIncrement);
-  drawCoreEnergyPulse(cx, cy, maxRadius, chargePower, time);
-  drawCenterGlow(cx, cy, maxRadius, glowAlpha, chargePower, releasePower);
-  drawChargeCompressionShade(cx, cy, maxRadius, chargePower);
+  drawWarpedGrid(cx, cy, gridAlpha, visualChargePower, releasePower, maxRadius, time, sleepVisualFactor);
+  drawVortexBody(cx, cy, maxRadius, attractionStrength, glowAlpha, sleepVisualFactor, spiralStepIncrement, visualChargePower, chargedColorFade);
+  drawCoreEnergyPulse(cx, cy, maxRadius, visualChargePower, time);
+  drawCenterGlow(cx, cy, maxRadius, glowAlpha, visualChargePower, releasePower, clamp(wakeGlowSuppression, 0.08, FULL_ALPHA));
+  drawChargeCompressionShade(cx, cy, maxRadius, visualChargePower);
   drawShockwaves();
-  drawOuterShade(cx, cy, maxRadius, idleFactor);
+  drawOuterShade(cx, cy, maxRadius, sleepVisualFactor);
+  ctx.restore();
 
   updateIntroOverlay();
-  ctx.restore();
+  updateChargeMeter(now, time);
   requestAnimationFrame(draw);
 }
 
@@ -695,24 +1017,25 @@ window.addEventListener("pointerdown", (event) => {
 
 // 输入模块：让漩涡中心平滑跟随指针位置。
 window.addEventListener("pointermove", (event) => {
-  lastMouseMoveTime = performance.now();
+  markInteractionActive();
   targetCenter.x = clamp(event.clientX / width, POINTER_MIN_X, POINTER_MAX_X);
   targetCenter.y = clamp(event.clientY / height, POINTER_MIN_Y, POINTER_MAX_Y);
 });
 
 // 释放模块：将蓄积能量转换为向外扩散的冲击波。
-window.addEventListener("pointerup", () => {
-  if (isManuallyPaused) {
-    return;
-  }
+function triggerRelease(releaseTime = performance.now(), forceFullRelease = false) {
+  markInteractionActive(releaseTime);
 
   if (chargePower > RELEASE_TRIGGER_THRESHOLD) {
-    const releaseIntensity = Math.pow(chargePower, RELEASE_INTENSITY_POWER);
-    const visibleReleaseIntensity = lerp(0.18, FULL_ALPHA, releaseIntensity);
+    const holdDuration = releaseTime - pressStartTime;
+    const releaseRaw = clamp((holdDuration - RELEASE_INTENSITY_HOLD_START_MS) / RELEASE_INTENSITY_HOLD_RANGE_MS, ZERO_VALUE, FULL_ALPHA);
+    const releaseIntensity = forceFullRelease ? FULL_ALPHA : Math.pow(releaseRaw, RELEASE_INTENSITY_POWER);
+    const visibleReleaseIntensity = RELEASE_BASE_INTENSITY + releaseIntensity * RELEASE_VISIBLE_INTENSITY_SCALE;
 
-    releasePower = visibleReleaseIntensity;
-    currentReleaseIntensity = releaseIntensity;
-    releaseShakeAmplitude = visibleReleaseIntensity * RELEASE_SHAKE_STRENGTH;
+    releasePower = Math.max(releasePower, visibleReleaseIntensity);
+    currentReleaseIntensity = Math.max(currentReleaseIntensity, releaseIntensity);
+    releaseShakeAmplitude = Math.max(releaseShakeAmplitude, RELEASE_BASE_SHAKE + releaseIntensity * RELEASE_SHAKE_STRENGTH);
+    releaseGraceUntil = releaseTime + RELEASE_IDLE_GRACE_MS;
     const waveX = width * vortexCenter.x;
     const waveY = height * vortexCenter.y;
 
@@ -723,8 +1046,8 @@ window.addEventListener("pointerup", () => {
         radius: i * SHOCKWAVE_RADIUS_STEP,
         alpha: clamp(visibleReleaseIntensity * SHOCKWAVE_ALPHA_SCALE * (FULL_ALPHA - i * SHOCKWAVE_ALPHA_DROP), ZERO_VALUE, FULL_ALPHA),
         power: releaseIntensity,
-        speed: SHOCKWAVE_BASE_SPEED + releaseIntensity * SHOCKWAVE_INTENSITY_SPEED + i * SHOCKWAVE_INDEX_SPEED,
-        width: SHOCKWAVE_BASE_WIDTH + releaseIntensity * SHOCKWAVE_INTENSITY_WIDTH - i * SHOCKWAVE_INDEX_WIDTH_DROP
+        speed: SHOCKWAVE_BASE_SPEED * visibleReleaseIntensity + releaseIntensity * SHOCKWAVE_INTENSITY_SPEED + i * SHOCKWAVE_INDEX_SPEED,
+        width: Math.max(FULL_ALPHA, SHOCKWAVE_BASE_WIDTH * visibleReleaseIntensity + releaseIntensity * SHOCKWAVE_INTENSITY_WIDTH - i * SHOCKWAVE_INDEX_WIDTH_DROP)
       });
     }
 
@@ -736,14 +1059,30 @@ window.addEventListener("pointerup", () => {
   chargePower = ZERO_VALUE;
   pressing = false;
   isPressed = false;
+  isOverloaded = false;
+  overloadStartTime = ZERO_VALUE;
+  chargeMeterVisibleUntil = releaseTime + 850;
   updateIntroOverlay();
+}
+
+window.addEventListener("pointerup", () => {
+  if (isManuallyPaused) {
+    return;
+  }
+
+  triggerRelease();
 });
 
 // 取消模块：当指针取消或页面失焦时清除蓄能状态。
 function cancelCharge() {
+  markInteractionActive();
+  releaseGraceUntil = ZERO_VALUE;
   pressing = false;
   isPressed = false;
   chargePower = ZERO_VALUE;
+  isOverloaded = false;
+  overloadStartTime = ZERO_VALUE;
+  chargeMeterVisibleUntil = performance.now() + 650;
   updateIntroOverlay();
 }
 
